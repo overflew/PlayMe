@@ -25,6 +25,8 @@ using PlayMe.Server.Queue.Interfaces;
 using PlayMe.Server.ServiceModel;
 using PlayMe.Server.SoundBoard;
 using Logger = PlayMe.Plumbing.Diagnostics.Logger;
+using PlayMe.Server.AutoPlay.CuratedPlaylists;
+
 namespace PlayMe.Server
 {
     public class ServiceModule : NinjectModule
@@ -41,8 +43,13 @@ namespace PlayMe.Server
                 .ToMethod(ctx => serviceType => ctx.Kernel.Get<NinjectInstanceProvider>(new ConstructorArgument("serviceType", serviceType)));
 
             Bind<IMusicProviderFactory>().To<MusicProviderFactory>().InSingletonScope();
-            
-            Bind<IAutoPlay>().To<DefaultAutoPlay>();
+
+            // TEMP: Switch to use the new autoplay we're dev'ing
+            Bind<IAutoPlay>().To<CuratedPlaylistsAutoplay>();
+
+            // NB: Original autoplay...
+            // Bind<IAutoPlay>().To<DefaultAutoPlay>();
+
             Bind<ISearchSuggestionService>().To<SearchSuggestionService>();
             Bind<IRickRollService>().To<RickRollService>();
             Bind<IRandomizerFactory>().To<RandomizerFactory>();
