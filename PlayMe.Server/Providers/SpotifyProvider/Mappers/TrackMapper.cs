@@ -43,7 +43,7 @@ namespace PlayMe.Server.Providers.SpotifyProvider.Mappers
             }
 
             //We want to set whether the track is already queued 
-            if(alreadyQueuedHelper!=null)
+            if (alreadyQueuedHelper != null)
             {
                 trackResult = alreadyQueuedHelper.ResetAlreadyQueued((trackResult), user);
             }

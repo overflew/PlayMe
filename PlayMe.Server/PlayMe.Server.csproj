@@ -178,6 +178,9 @@
     </Compile>
     <Compile Include="Player\BassBufferedPlayer.cs" />
     <Compile Include="Player\BassStreamedPlayer.cs" />
+    <Compile Include="Providers\NewSpotifyProvider\Mappers\AlbumMapper.cs" />
+    <Compile Include="Providers\NewSpotifyProvider\Mappers\ArtistMapper.cs" />
+    <Compile Include="Providers\NewSpotifyProvider\Mappers\TrackMapper.cs" />
     <Compile Include="Providers\NewSpotifyProvider\NewSpotifyNinjectModule.cs" />
     <Compile Include="Providers\NewSpotifyProvider\NewSpotifyProvider.cs" />
     <Compile Include="Providers\NewSpotifyProvider\NewSpotifySettings.cs" />

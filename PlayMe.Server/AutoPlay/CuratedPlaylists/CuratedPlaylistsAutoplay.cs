@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using PlayMe.Common.Model;
 using PlayMe.Server.Providers.NewSpotifyProvider;
+using PlayMe.Server.Providers.NewSpotifyProvider.Mappers;
+using SpotifyAPI.Web.Models;
 
 namespace PlayMe.Server.AutoPlay.CuratedPlaylists
 {
@@ -13,15 +15,19 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
         // User name to appear in the UI
         const string CuratedPlaylistsDisplayName = "Autoplay - Curated playlists";
 
+        private readonly Random _random;
+
         private readonly NewSpotifyProvider _spotify;
         private readonly IPlaylistRepository _playlistRepository;
-        private readonly Random _random;
+        private readonly ITrackMapper _trackMapper;
 
         public CuratedPlaylistsAutoplay(
             // TODO: Inject these via interfaces
             NewSpotifyProvider spotify,
-            PlaylistRepository playlistRepository)
+            PlaylistRepository playlistRepository,
+            ITrackMapper trackMapper)
         {
+            _trackMapper = trackMapper;
             _spotify = spotify;
             _playlistRepository = playlistRepository;
 
@@ -35,7 +41,7 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
             var playlistConfig = _playlistRepository.GetRandomPlaylist();
 
             var client = _spotify.GetClient();
-
+            
             var playlist = client.GetPlaylist(playlistConfig.User, playlistConfig.PlaylistId);
 
             // -- Pick a random song
@@ -44,13 +50,8 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
             var randomTrack = playlist.Tracks.Items[randomIndex];
 
             // -- Map it to the business models
-            // TODO: Create full mappers for track/artist/album
-            var mappedTrack = new Track()
-            {
-                Link = randomTrack.Track.Id,
-                Name = randomTrack.Track.Name
-            };
-
+            var mappedTrack = _trackMapper.Map(randomTrack.Track, CuratedPlaylistsDisplayName, true, true);
+            
             return new QueuedTrack()
             {
                 Track = mappedTrack,
