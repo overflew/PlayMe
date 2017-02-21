@@ -19,7 +19,7 @@ namespace PlayMe.Common.Util
         }
 
         // Taken from http://stackoverflow.com/questions/56692/random-weighted-choice
-        public static T Choose<T>(IList<T> list) where T : IWeighted
+        public static T ChooseWeightedRandom<T>(IList<T> list) where T : IWeighted
         {
             if (list.Count == 0)
             {

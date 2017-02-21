@@ -1,68 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Nerdle.AutoConfig;
 using PlayMe.Common.Util;
+using PlayMe.Server.AutoPlay.CuratedPlaylists.Config;
 
 namespace PlayMe.Server.AutoPlay.CuratedPlaylists
 {
     interface IPlaylistRepository
     {
-        PlaylistModel GetRandomPlaylist();
+        IPlaylist GetRandomPlaylist();
 
-        IList<PlaylistModel> GetAllPlaylists();
+        IList<IPlaylist> GetAllPlaylists();
     }
 
     public class PlaylistRepository : IPlaylistRepository
     {
-        public PlaylistModel GetRandomPlaylist()
+        public IPlaylist GetRandomPlaylist()
         {
             var playlists = GetAllPlaylists();
 
-            return WeightingUtil.Choose(playlists);
+            return WeightingUtil.ChooseWeightedRandom(playlists);
         }
 
-        public IList<PlaylistModel> GetAllPlaylists()
+        public IList<IPlaylist> GetAllPlaylists()
         {
-            // TODO: Move this out to a .config file.
-            return new List<PlaylistModel>()
-            {
-                new PlaylistModel() {
-                    PlaylistName = "BBC 6 Music recommends",
-                    User = "bbc_playlister",
-                    PlaylistId = "6ToRtiBeKUf0py8gZO6gQj",
-                    Weight = 10
-                },
-                new PlaylistModel()
-                {
-                    PlaylistName = "Hottest record in the world",
-                    User = "bbc_playlister",
-                    PlaylistId = "1Snu2f6yIWWufuqYkYaYKR",
-                    Weight = 10
-                },
-                new PlaylistModel()
-                {
-                    PlaylistName = "Double J Hitlist",
-                    User = "doublejradio",
-                    PlaylistId = "3eVaP90RyWrOKu6Gejw5Eg",
-                    Weight = 10
-                },
-                new PlaylistModel()
-                {
-                    PlaylistName = "Josh Homme's Alligator Hour",
-                    User = "1262019033",
-                    PlaylistId = "4m4bGVPdfssEkn7u3CVQFd",
-                    Weight = 10
-                },
-                new PlaylistModel()
-                {
-                    PlaylistName = "The Definitive Later... with Jools",
-                    User = "ajpegg",
-                    PlaylistId = "1mWt9unHFcjyAT1SVI985d",
-                    Weight = 10
-                }
-            };
+            var config = AutoConfig.Map<IPlaylistConfig>();
+
+            return config.Playlists.ToList();
         }
     }
 }
