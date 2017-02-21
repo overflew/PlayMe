@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PlayMe.Common.Util;
 
 namespace PlayMe.Server.AutoPlay.CuratedPlaylists
 {
@@ -15,20 +16,11 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
 
     public class PlaylistRepository : IPlaylistRepository
     {
-        private readonly Random _random;
-
-        public PlaylistRepository()
-        {
-            _random = new Random();
-        }
-
         public PlaylistModel GetRandomPlaylist()
         {
             var playlists = GetAllPlaylists();
 
-            // TODO: Allow the randomisation to be weighted.
-            
-            return playlists[_random.Next(playlists.Count() - 1)];
+            return WeightingUtil.Choose(playlists);
         }
 
         public IList<PlaylistModel> GetAllPlaylists()
@@ -39,31 +31,36 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
                 new PlaylistModel() {
                     PlaylistName = "BBC 6 Music recommends",
                     User = "bbc_playlister",
-                    PlaylistId = "6ToRtiBeKUf0py8gZO6gQj"
+                    PlaylistId = "6ToRtiBeKUf0py8gZO6gQj",
+                    Weight = 10
                 },
                 new PlaylistModel()
                 {
                     PlaylistName = "Hottest record in the world",
                     User = "bbc_playlister",
-                    PlaylistId = "1Snu2f6yIWWufuqYkYaYKR"
+                    PlaylistId = "1Snu2f6yIWWufuqYkYaYKR",
+                    Weight = 10
                 },
                 new PlaylistModel()
                 {
                     PlaylistName = "Double J Hitlist",
                     User = "doublejradio",
-                    PlaylistId = "3eVaP90RyWrOKu6Gejw5Eg"
+                    PlaylistId = "3eVaP90RyWrOKu6Gejw5Eg",
+                    Weight = 10
                 },
                 new PlaylistModel()
                 {
                     PlaylistName = "Josh Homme's Alligator Hour",
                     User = "1262019033",
-                    PlaylistId = "4m4bGVPdfssEkn7u3CVQFd"
+                    PlaylistId = "4m4bGVPdfssEkn7u3CVQFd",
+                    Weight = 10
                 },
                 new PlaylistModel()
                 {
                     PlaylistName = "The Definitive Later... with Jools",
                     User = "ajpegg",
-                    PlaylistId = "1mWt9unHFcjyAT1SVI985d"
+                    PlaylistId = "1mWt9unHFcjyAT1SVI985d",
+                    Weight = 10
                 }
             };
         }
