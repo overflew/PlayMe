@@ -18,8 +18,7 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
 
         private SpotifyWebAPI _client;
         private Token _currentToken;
-        private DateTime _currentAssumedAuthTimeout;
-
+        
         public NewSpotifyProvider(
             ILogger logger,
             INewSpotifySettings spotifySettings)
@@ -30,12 +29,10 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
 
         public SpotifyWebAPI GetClient()
         {
-            // TODO: The auth token will eventually timeout. How can we test it, to decide when to re-auth?
-            // (there is a token.ExpiresIn property below. May it may crap out for other reasons?)
-
-            if (_client == null
-                || _currentToken.IsExpired() // TODO: Does this library calculate this field? (Will it tick over to false?)
-                || IsTokenNearExpiry())
+            if (_client == null                
+                || IsTokenNearExpiry()
+                || _currentToken.IsExpired() // Safety fallback...
+                )
             {
                 _client = CreateClient();
             }
@@ -44,7 +41,7 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
         }
 
 
-        public SpotifyWebAPI CreateClient()
+        private SpotifyWebAPI CreateClient()
         {
             //Create the auth object
             var auth = new ClientCredentialsAuth()
@@ -62,8 +59,6 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
             //With this token object, we now can make calls
              _currentToken = auth.DoAuth();
 
-            _currentAssumedAuthTimeout = _currentToken.CreateDate.AddSeconds(_currentToken.ExpiresIn);
-
             var spotify = new SpotifyWebAPI()
             {
                 TokenType = _currentToken.TokenType,
@@ -76,14 +71,16 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
 
         private bool IsTokenNearExpiry()
         {
-            if (_currentAssumedAuthTimeout == null)
+            if (_currentToken == null)
             {
                 return false;
             }
 
+            var assumedAuthTimeout = _currentToken.CreateDate.AddSeconds(_currentToken.ExpiresIn);
+            
             // TODO: Will this fail @ daylight savings?
 
-            return DateTime.Now > _currentAssumedAuthTimeout.AddMinutes(-2);
+            return DateTime.Now > assumedAuthTimeout.AddMinutes(-2);
         }
     }
 }
