@@ -17,6 +17,8 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
         private readonly INewSpotifySettings spotifySettings;
 
         private SpotifyWebAPI _client;
+        private Token _currentToken;
+        private DateTime _currentAssumedAuthTimeout;
 
         public NewSpotifyProvider(
             ILogger logger,
@@ -31,7 +33,9 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
             // TODO: The auth token will eventually timeout. How can we test it, to decide when to re-auth?
             // (there is a token.ExpiresIn property below. May it may crap out for other reasons?)
 
-            if (_client == null)
+            if (_client == null
+                || _currentToken.IsExpired() // TODO: Does this library calculate this field? (Will it tick over to false?)
+                || IsTokenNearExpiry())
             {
                 _client = CreateClient();
             }
@@ -56,15 +60,30 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
             };
 
             //With this token object, we now can make calls
-            Token token = auth.DoAuth();
+             _currentToken = auth.DoAuth();
+
+            _currentAssumedAuthTimeout = _currentToken.CreateDate.AddSeconds(_currentToken.ExpiresIn);
+
             var spotify = new SpotifyWebAPI()
             {
-                TokenType = token.TokenType,
-                AccessToken = token.AccessToken,
+                TokenType = _currentToken.TokenType,
+                AccessToken = _currentToken.AccessToken,
                 UseAuth = true
             };
 
             return spotify;
+        }
+
+        private bool IsTokenNearExpiry()
+        {
+            if (_currentAssumedAuthTimeout == null)
+            {
+                return false;
+            }
+
+            // TODO: Will this fail @ daylight savings?
+
+            return DateTime.Now > _currentAssumedAuthTimeout.AddMinutes(-2);
         }
     }
 }
