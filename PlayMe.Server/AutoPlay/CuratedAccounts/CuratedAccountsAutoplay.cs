@@ -73,7 +73,7 @@ namespace PlayMe.Server.AutoPlay.CuratedAccounts
 
                 // Important: Tag the source of this autoplay variant
                 User = CuratedPlaylistsDisplayName,
-                Reason = $"Playlist: {fullPlaylist.Owner.DisplayName}: {fullPlaylist.Name}"
+                Reason = $"Playlist: {accountConfig.DisplayName}: {fullPlaylist.Name}"
             };
 
         }
