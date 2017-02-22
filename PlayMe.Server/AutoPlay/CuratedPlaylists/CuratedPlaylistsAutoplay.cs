@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PlayMe.Common.Model;
+using PlayMe.Plumbing.Diagnostics;
 using PlayMe.Server.Providers.NewSpotifyProvider;
 using PlayMe.Server.Providers.NewSpotifyProvider.Mappers;
 using SpotifyAPI.Web.Models;
@@ -15,21 +16,27 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
         // User name to appear in the UI
         const string CuratedPlaylistsDisplayName = "Autoplay - Curated playlists";
 
+        // TODO: Move this out to external config. It's required in searches in order to populate 'IsPlayable' on tracks
+        private const string LOCAL_MARKET = "NZ";
+
         private readonly Random _random;
 
         private readonly NewSpotifyProvider _spotify;
         private readonly IPlaylistRepository _playlistRepository;
+        private readonly ILogger _logger;
         private readonly ITrackMapper _trackMapper;
 
         public CuratedPlaylistsAutoplay(
             // TODO: Inject these via interfaces
             NewSpotifyProvider spotify,
             PlaylistRepository playlistRepository,
+            ILogger logger,
             ITrackMapper trackMapper)
         {
             _trackMapper = trackMapper;
             _spotify = spotify;
             _playlistRepository = playlistRepository;
+            _logger = logger;
 
             _random = new Random();
         }
@@ -42,11 +49,18 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
 
             var client = _spotify.GetClient();
             
-            var playlist = client.GetPlaylist(playlistConfig.User, playlistConfig.PlaylistId);
+            var playlist = client.GetPlaylist(playlistConfig.User, playlistConfig.PlaylistId, null, LOCAL_MARKET);
 
             // -- Pick a random song
-            var randomTrack = PickRandomTrack(playlist);
-            
+
+            var randomTrack = PickRandomTrackThatsPlayable(playlist);
+
+            if (randomTrack == null)
+            {
+                // Panic mode? Hope that the core system will just move on & try something else...
+                return null;
+            }
+
             // -- Map it to the business models
             var mappedTrack = _trackMapper.Map(randomTrack.Track, CuratedPlaylistsDisplayName, true, true);
             
@@ -61,6 +75,25 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
 
         }
 
+        private PlaylistTrack PickRandomTrackThatsPlayable(FullPlaylist playlist)
+        {
+            // TODO: This, but better?
+            // Have a limited # of attempts at get a song that registers as being 'IsPlayable' (as a few aren't...)
+            for (int i = 0; i < 5; i++)
+            {
+                var track = PickRandomTrack(playlist);
+                if (track.Track.IsPlayable.GetValueOrDefault())
+                {
+                    return track;
+                }
+
+                _logger.Debug($"Skipping unplayable track: {track.Track.Name} - {track.Track.Artists.First().Name}" );
+            }
+
+            // Panic mode. Couldn't find a playable track.
+            return null;
+        }
+        
         private PlaylistTrack PickRandomTrack(FullPlaylist playlist)
         {
             var randomIndex = _random.Next(playlist.Tracks.Total);
@@ -79,7 +112,8 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
             var indexAfterOffset = randomIndex - offset;
 
             var client = _spotify.GetClient();
-            var paginatedTracks = client.GetPlaylistTracks(playlist.Owner.Id, playlist.Id, null, 100, offset);
+            var paginatedTracks = 
+                client.GetPlaylistTracks(playlist.Owner.Id, playlist.Id, null, 100, offset, LOCAL_MARKET);
 
             var randomTrack = paginatedTracks.Items[indexAfterOffset];
 
