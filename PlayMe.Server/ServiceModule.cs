@@ -11,6 +11,7 @@ using PlayMe.Data;
 using PlayMe.Data.Mongo;
 using PlayMe.Plumbing.Diagnostics;
 using PlayMe.Server.AutoPlay;
+using PlayMe.Server.AutoPlay.CuratedAccounts;
 using PlayMe.Server.AutoPlay.TrackRandomizers;
 using PlayMe.Server.Helpers;
 using PlayMe.Server.Helpers.Interfaces;
@@ -45,7 +46,10 @@ namespace PlayMe.Server
             Bind<IMusicProviderFactory>().To<MusicProviderFactory>().InSingletonScope();
 
             // TEMP: Switch to use the new autoplay we're dev'ing
-            Bind<IAutoPlay>().To<CuratedPlaylistsAutoplay>();
+            Bind<IAutoPlay>().To<CuratedAccountsAutoplay>();
+
+            // Other testing autoplays
+            //Bind<IAutoPlay>().To<CuratedPlaylistsAutoplay>();
 
             // NB: Original autoplay...
             // Bind<IAutoPlay>().To<DefaultAutoPlay>();

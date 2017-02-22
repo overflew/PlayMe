@@ -130,6 +130,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoPlay\CuratedAccounts\Config\IFollowAccount.cs" />
+    <Compile Include="AutoPlay\CuratedAccounts\Config\IFollowAccountConfig.cs" />
+    <Compile Include="AutoPlay\CuratedAccounts\CuratedAccountsAutoplay.cs" />
+    <Compile Include="AutoPlay\CuratedAccounts\FollowedAccountsRepository.cs" />
     <Compile Include="AutoPlay\CuratedPlaylists\Config\IPlaylistConfig.cs" />
     <Compile Include="AutoPlay\CuratedPlaylists\Config\IPlaylist.cs" />
     <Compile Include="AutoPlay\CuratedPlaylists\CuratedPlaylistsAutoplay.cs" />
@@ -290,6 +294,9 @@
     <Compile Include="UserSettings.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="config\followAccounts.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="config\playlists.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
