@@ -46,9 +46,8 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
 
             // -- Pick a random song
             // TODO: For really large playlists, will we have to paginate to retrieve all the tracks?
-            var randomIndex = _random.Next(playlist.Tracks.Items.Count);
-            var randomTrack = playlist.Tracks.Items[randomIndex];
-
+            var randomTrack = PickRandomTrack(playlist);
+            
             // -- Map it to the business models
             var mappedTrack = _trackMapper.Map(randomTrack.Track, CuratedPlaylistsDisplayName, true, true);
             
@@ -61,6 +60,31 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
                 Reason = string.Format("Playlist: {0}", playlist.Name)
             };
 
+        }
+
+        private PlaylistTrack PickRandomTrack(FullPlaylist playlist)
+        {
+            var randomIndex = _random.Next(playlist.Tracks.Total);
+            var perPage = playlist.Tracks.Limit;
+
+            var page = (int)(randomIndex / perPage); // Floor rounding - via int
+
+            if (page == 0)
+            {
+                return playlist.Tracks.Items[randomIndex];
+            }
+
+            // If not on the first page - Paginate
+
+            var offset = page * perPage;
+            var indexAfterOffset = randomIndex - offset;
+
+            var client = _spotify.CreateClient();
+            var paginatedTracks = client.GetPlaylistTracks(playlist.Owner.Id, playlist.Id, null, 100, offset);
+
+            var randomTrack = paginatedTracks.Items[indexAfterOffset];
+
+            return randomTrack;
         }
     }
 }
