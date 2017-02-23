@@ -70,6 +70,7 @@
     <Compile Include="Model\Veto.cs" />
     <Compile Include="Model\TrackScore.cs" />
     <Compile Include="Util\IWeighted.cs" />
+    <Compile Include="Util\ListExtensionMethods.cs" />
     <Compile Include="Util\WeightingUtil.cs" />
   </ItemGroup>
   <ItemGroup>
