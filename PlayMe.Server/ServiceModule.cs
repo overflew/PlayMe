@@ -27,6 +27,7 @@ using PlayMe.Server.ServiceModel;
 using PlayMe.Server.SoundBoard;
 using Logger = PlayMe.Plumbing.Diagnostics.Logger;
 using PlayMe.Server.AutoPlay.CuratedPlaylists;
+using PlayMe.Server.AutoPlay.Recommendations;
 
 namespace PlayMe.Server
 {
@@ -46,9 +47,10 @@ namespace PlayMe.Server
             Bind<IMusicProviderFactory>().To<MusicProviderFactory>().InSingletonScope();
 
             // TEMP: Switch to use the new autoplay we're dev'ing
-            Bind<IAutoPlay>().To<CuratedAccountsAutoplay>();
+            Bind<IAutoPlay>().To<RecommendationsAutoplay>();
 
             // Other testing autoplays
+            //Bind<IAutoPlay>().To<CuratedAccountsAutoplay>();
             //Bind<IAutoPlay>().To<CuratedPlaylistsAutoplay>();
 
             // NB: Original autoplay...

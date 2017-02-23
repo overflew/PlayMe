@@ -138,6 +138,7 @@
     <Compile Include="AutoPlay\CuratedPlaylists\Config\IPlaylist.cs" />
     <Compile Include="AutoPlay\CuratedPlaylists\CuratedPlaylistsAutoplay.cs" />
     <Compile Include="AutoPlay\CuratedPlaylists\PlaylistRepository.cs" />
+    <Compile Include="AutoPlay\Recommendations\RecommendationsAutoplay.cs" />
     <Compile Include="Broadcast\Broadcasters\Twitter\ITwitterSettings.cs" />
     <Compile Include="Broadcast\Broadcasters\Twitter\TwitterSettings.cs" />
     <Compile Include="Broadcast\BroadcastMessageRuleResolver.cs" />
