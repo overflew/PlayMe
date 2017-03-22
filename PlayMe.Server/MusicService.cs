@@ -17,7 +17,6 @@ using PlayMe.Server.Providers;
 using PlayMe.Server.Queries;
 using PlayMe.Server.Queue.Interfaces;
 using PlayMe.Server.SoundBoard;
-using Ninject;
 
 namespace PlayMe.Server
 {

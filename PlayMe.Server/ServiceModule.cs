@@ -28,7 +28,6 @@ using PlayMe.Server.SoundBoard;
 using Logger = PlayMe.Plumbing.Diagnostics.Logger;
 using PlayMe.Server.AutoPlay.CuratedPlaylists;
 using PlayMe.Server.AutoPlay.MultiAutoplay;
-using PlayMe.Server.AutoPlay.MultiAutoPlay.Config;
 using PlayMe.Server.AutoPlay.MultiAutoPlay;
 
 namespace PlayMe.Server
@@ -51,13 +50,8 @@ namespace PlayMe.Server
             // TEMP: Switch to use the new autoplay we're dev'ing
             Bind<IAutoPlay>().To<MultiAutoPlay>();
 
-            //Kernel.Bind(x => x.FromThisAssembly()
-            //    .SelectAllClasses()
-            //    .InheritedFrom<IStandAloneAutoPlay>()
-            //    .BindDefaultInterfaces()
-            //    .Configure((c, s) => c.InSingletonScope()));
-
-            // Other testing autoplays
+            // Binding standalone autoplays for multiAutoPlay
+            // TODO: discover all autoPlays implementing IStandAloneAutoPlay
             Bind<IStandAloneAutoPlay>().To<DefaultAutoPlay>();
             Bind<IStandAloneAutoPlay>().To<CuratedPlaylistsAutoplay>();
             Bind<IStandAloneAutoPlay>().To<CuratedAccountsAutoplay>();
@@ -155,7 +149,6 @@ namespace PlayMe.Server
             Bind<IUserService>().To<UserService>();
             Bind<IUserSettings>().To<UserSettings>();
             Bind<ICallbackClient>().To<CallbackClient>();
-
 
             // MultiAutoPlay bindings
             Bind<IWeigtedAutoPlayRepository>().To<WeigtedAutoPlayRepository>();
