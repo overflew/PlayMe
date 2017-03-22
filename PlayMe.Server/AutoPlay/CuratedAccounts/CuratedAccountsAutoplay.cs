@@ -9,7 +9,7 @@ using SpotifyAPI.Web.Models;
 
 namespace PlayMe.Server.AutoPlay.CuratedAccounts
 {
-    public class CuratedAccountsAutoplay : IAutoPlay
+    public class CuratedAccountsAutoplay : IStandAloneAutoPlay
     {
         private readonly NewSpotifyProvider _spotify;
         private readonly FollowedAccountsRepository _followedAccountsRepository;

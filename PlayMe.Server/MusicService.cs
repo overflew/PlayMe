@@ -17,6 +17,7 @@ using PlayMe.Server.Providers;
 using PlayMe.Server.Queries;
 using PlayMe.Server.Queue.Interfaces;
 using PlayMe.Server.SoundBoard;
+using Ninject;
 
 namespace PlayMe.Server
 {
@@ -48,7 +49,7 @@ namespace PlayMe.Server
 
 	    public MusicService(ILogger logger,
 			IMusicProviderFactory musicProviderFactory,
-			IAutoPlay autoplayer,
+            IAutoPlay autoplayer,
             IDataService<QueuedTrack> queuedTrackDataService,
 			IDataService<User> adminUserDataService,
 			ISearchSuggestionService searchSuggestionService,

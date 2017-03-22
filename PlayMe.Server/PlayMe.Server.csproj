@@ -138,6 +138,13 @@
     <Compile Include="AutoPlay\CuratedPlaylists\Config\IPlaylist.cs" />
     <Compile Include="AutoPlay\CuratedPlaylists\CuratedPlaylistsAutoplay.cs" />
     <Compile Include="AutoPlay\CuratedPlaylists\PlaylistRepository.cs" />
+    <Compile Include="AutoPlay\IStandAloneAutoPlay.cs" />
+    <Compile Include="AutoPlay\MultiAutoPlay\AutoPlayResolver.cs" />
+    <Compile Include="AutoPlay\MultiAutoPlay\Config\IWeightedAutoPlay.cs" />
+    <Compile Include="AutoPlay\MultiAutoPlay\Config\IWeightedAutoPlayConfig.cs" />
+    <Compile Include="AutoPlay\MultiAutoPlay\IWeigtedAutoPlayRepository.cs" />
+    <Compile Include="AutoPlay\MultiAutoPlay\WeigtedAutoPlayRepository.cs" />
+    <Compile Include="AutoPlay\MultiAutoPlay\MultiAutoPlay.cs" />
     <Compile Include="Broadcast\Broadcasters\Twitter\ITwitterSettings.cs" />
     <Compile Include="Broadcast\Broadcasters\Twitter\TwitterSettings.cs" />
     <Compile Include="Broadcast\BroadcastMessageRuleResolver.cs" />
@@ -294,6 +301,9 @@
     <Compile Include="UserSettings.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="config\weightedAutoPlayConfig.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="config\followAccounts.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

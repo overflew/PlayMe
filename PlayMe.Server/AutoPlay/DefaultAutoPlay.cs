@@ -10,7 +10,7 @@ using PlayMe.Server.Providers;
 
 namespace PlayMe.Server.AutoPlay
 {
-    public class DefaultAutoPlay : IAutoPlay
+    public class DefaultAutoPlay : IStandAloneAutoPlay
     {
         private readonly IDataService<MapReduceResult<TrackScore>> trackScoreDataService;
         private readonly IDataService<QueuedTrack> queuedTrackDataService;
