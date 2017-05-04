@@ -147,12 +147,14 @@ namespace PlayMe.Server
 		    searchResults.PagedAlbums = searchRuleHelper.FilterAlbums(searchResults.PagedAlbums);
 		    searchResults.PagedArtists = searchRuleHelper.FilterArtists(searchResults.PagedArtists);
 
-			// save the search if there were results
-			if (searchResults.PagedAlbums.Albums.Any() 
-				|| searchResults.PagedArtists.Artists.Any() 
-				|| searchResults.PagedTracks.Tracks.Any())
-					searchSuggestionService.UpdateSearchTermRecords(searchTerm);
-		   
+            // save the search if there were results
+            if (searchResults.PagedAlbums.Albums.Any()
+                || searchResults.PagedArtists.Artists.Any()
+                || searchResults.PagedTracks.Tracks.Any())
+            {
+                searchSuggestionService.UpdateSearchTermRecords(searchTerm);
+            }
+
 			return searchResults;
 		}
 

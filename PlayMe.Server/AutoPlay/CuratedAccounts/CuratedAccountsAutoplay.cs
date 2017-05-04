@@ -24,7 +24,7 @@ namespace PlayMe.Server.AutoPlay.CuratedAccounts
         private readonly Random _random;
 
         public CuratedAccountsAutoplay(
-        // TODO: Inject these via interfaces
+            // TODO: Inject these via interfaces
             NewSpotifyProvider spotify,
             FollowedAccountsRepository followedAccountsRepository,
             ILogger logger,

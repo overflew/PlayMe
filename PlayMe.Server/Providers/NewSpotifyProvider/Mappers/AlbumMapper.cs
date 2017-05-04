@@ -12,6 +12,12 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
             //SpotifyMusicProvider musicProvider, 
             bool mapArtist = false
             );
+
+        Album Map(
+            FullAlbum album,
+            //SpotifyMusicProvider musicProvider, 
+            bool mapArtist = false
+            );
     }
 
     public class AlbumMapper : IAlbumMapper
@@ -25,6 +31,29 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
 
         public Album Map(
             SimpleAlbum album, 
+            //SpotifyMusicProvider musicProvider, 
+            bool mapArtist = false)
+        {
+            var albumResult = new Album
+            {
+                Link = album.Id,
+                Name = album.Name,
+                //Year = album..Year,
+                //ArtworkId = album.CoverId,
+                ArtworkUrlLarge = album.Images[0].Url, // TODO: Ensure sort order on images?
+                ArtworkUrlMedium = album.Images[1].Url,
+                ArtworkUrlSmall = album.Images[2].Url,
+                IsAvailable = true, //album.IsAvailable,
+                //MusicProvider = musicProvider.Descriptor,
+                ExternalLink = new Uri(album.ExternalUrls["spotify"])
+            };
+
+            return albumResult;
+
+        }
+
+        public Album Map(
+            FullAlbum album,
             //SpotifyMusicProvider musicProvider, 
             bool mapArtist = false)
         {

@@ -17,6 +17,8 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
             Bind<ITrackMapper>().To<TrackMapper>();
             Bind<IArtistMapper>().To<ArtistMapper>();
             Bind<IAlbumMapper>().To<AlbumMapper>();
+
+            Bind<ISpotifySearchService>().To<NewSpotifySearchService>();
         }
     }
 }

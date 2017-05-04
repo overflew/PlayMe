@@ -193,6 +193,7 @@
     <Compile Include="Providers\NewSpotifyProvider\Mappers\TrackMapper.cs" />
     <Compile Include="Providers\NewSpotifyProvider\NewSpotifyNinjectModule.cs" />
     <Compile Include="Providers\NewSpotifyProvider\NewSpotifyProvider.cs" />
+    <Compile Include="Providers\NewSpotifyProvider\NewSpotifySearchService.cs" />
     <Compile Include="Providers\NewSpotifyProvider\NewSpotifySettings.cs" />
     <Compile Include="Providers\SoundCloud\ISoundCloudSettings.cs" />
     <Compile Include="Providers\SoundCloud\SoundCloudSettings.cs" />
