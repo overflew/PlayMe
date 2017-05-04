@@ -35,6 +35,13 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
                 ExternalLink = new Uri(artist.ExternalUrls["spotify"])
             };
 
+            // TODO: Figure out how to not do this...
+            artistResult.MusicProvider = new MusicProviderDescriptor()
+            {
+                Identifier = "sp",
+                Name = "Spotify"
+            };
+
             return artistResult;
 
         }
@@ -49,12 +56,24 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
             {
                 Link = artist.Id,
                 Name = artist.Name,
-                PortraitUrlLarge = artist.Images[0].Url,
-                PortraitUrlMedium = artist.Images[1].Url,
-                PortraitUrlSmall = artist.Images[2].Url,
                 //PortraitId = artist.PortraitId,
                 //MusicProvider = musicProvider.Descriptor,
                 ExternalLink = new Uri(artist.ExternalUrls["spotify"])
+            };
+
+            if (artist.Images != null && artist.Images.Any())
+            {
+                // TODO: More null checking?
+                artistResult.PortraitUrlLarge = artist.Images[0].Url;
+                artistResult.PortraitUrlMedium = artist.Images[1].Url;
+                artistResult.PortraitUrlSmall = artist.Images[2].Url;                
+            }
+
+            // TODO: Figure out how to not do this...
+            artistResult.MusicProvider = new MusicProviderDescriptor()
+            {
+                Identifier = "sp",
+                Name = "Spotify"
             };
 
             return artistResult;

@@ -12,6 +12,11 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
             string user,
             bool mapAlbum = true,
             bool mapArtists = true);
+
+        Track Map(
+           SpotifyAPI.Web.Models.SimpleTrack track,
+           string user,
+           bool mapAlbum = true);
     }
 
     public class TrackMapper : ITrackMapper
@@ -36,6 +41,13 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
             bool mapAlbum = true,
             bool mapArtists = true)
         {
+            // TODO: Figure out how I'm supposed to get this damned thing
+            var providerHack = new MusicProviderDescriptor()
+            {
+                Identifier = "sp",
+                Name = "Spotify"
+            };
+
             //string trackLink = track.GetLinkString();
             var trackResult = new Track
             {
@@ -44,7 +56,7 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
                 IsAvailable = track.IsPlayable == null ? true : track.IsPlayable.Value,
                 Duration = new TimeSpan(track.DurationMs),
                 DurationMilliseconds = track.DurationMs,
-                //MusicProvider = "sp",
+                MusicProvider = providerHack,
                 ExternalLink = new Uri(track.ExternUrls["spotify"])
             };
 
@@ -52,6 +64,45 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
             {
                 trackResult.Album = albumMapper.Map(track.Album);
             }
+
+            if (mapArtists && track.Artists != null)
+            {
+                trackResult.Artists = track.Artists.Select(t => artistMapper.Map(t)).ToArray();
+            }
+
+            //We want to set whether the track is already queued 
+            if (alreadyQueuedHelper != null)
+            {
+                trackResult = alreadyQueuedHelper.ResetAlreadyQueued((trackResult), user);
+            }
+
+            return trackResult;
+        }
+
+        public Track Map(
+            SpotifyAPI.Web.Models.SimpleTrack track,
+            string user,
+            bool mapArtists = true)
+        {
+
+            // TODO: Figure out how I'm supposed to get this damned thing
+            var providerHack = new MusicProviderDescriptor()
+            {
+                Identifier = "sp",
+                Name = "Spotify"
+            };
+
+            //string trackLink = track.GetLinkString();
+            var trackResult = new Track
+            {
+                Link = track.Id,
+                Name = track.Name,
+                //IsAvailable = track.IsPlayable == null ? true : track.IsPlayable.Value,
+                Duration = new TimeSpan(track.DurationMs),
+                DurationMilliseconds = track.DurationMs,
+                MusicProvider = providerHack,
+                ExternalLink = new Uri(track.ExternUrls["spotify"])
+            };
 
             if (mapArtists && track.Artists != null)
             {

@@ -108,7 +108,11 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
 
             var albumResult = _albumMapper.Map(album);
 
-            // TODO: Map tracks? How to avoid cyclic dependencies??????
+            albumResult.Tracks = album.Tracks.Items.Select(
+                t => _trackMapper.Map(t, user)).ToArray();
+
+           
+            // TODO: Map tracks in mapper? How to avoid cyclic dependencies??????
 
             return albumResult;
         }

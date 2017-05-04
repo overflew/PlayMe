@@ -48,6 +48,13 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
                 ExternalLink = new Uri(album.ExternalUrls["spotify"])
             };
 
+            // TODO: Figure out how to not do this...
+            albumResult.MusicProvider = new MusicProviderDescriptor()
+            {
+                Identifier = "sp",
+                Name = "Spotify"
+            };
+
             return albumResult;
 
         }
@@ -69,6 +76,13 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
                 IsAvailable = true, //album.IsAvailable,
                 //MusicProvider = musicProvider.Descriptor,
                 ExternalLink = new Uri(album.ExternalUrls["spotify"])
+            };
+
+            // TODO: Figure out how to not do this...
+            albumResult.MusicProvider = new MusicProviderDescriptor()
+            {
+                Identifier = "sp",
+                Name = "Spotify"
             };
 
             return albumResult;
