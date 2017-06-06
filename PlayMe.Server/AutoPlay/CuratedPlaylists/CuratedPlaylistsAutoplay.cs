@@ -11,7 +11,7 @@ using SpotifyAPI.Web.Models;
 
 namespace PlayMe.Server.AutoPlay.CuratedPlaylists
 {
-    public class CuratedPlaylistsAutoplay : IAutoPlay
+    public class CuratedPlaylistsAutoplay : IStandAloneAutoPlay
     {
         // User name to appear in the UI
         const string CuratedPlaylistsDisplayName = "Autoplay - Curated playlists";
