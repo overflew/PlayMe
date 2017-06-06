@@ -18,6 +18,7 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
         // Set to a reasonable number to handle veto-battles
         private const int TRACK_CACHE_SIZE = 5;
         private static Object _fillCacheLock = new Object();
+        private static Object _querySongsLock = new object();
 
         public MultiAutoPlay(IWeightedAutoPlayRepository autoPlayRepository, AutoPlayResolver autoPlayResolver)
         {
@@ -77,7 +78,10 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
             var instance = autoPlayResolver.GetAutoPlayInstance(autoPlay.Name);
 
             // 3) queue new track
-            return instance.FindTrack();
+            lock (_querySongsLock) // Don't multi-request from our async thread
+            {
+                return instance.FindTrack();
+            }
         }
     }
 }

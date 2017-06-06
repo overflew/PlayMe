@@ -16,7 +16,7 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
         private readonly ILogger logger;
         private readonly INewSpotifySettings spotifySettings;
 
-        private SpotifyWebAPI _client;
+        private static SpotifyWebAPI _client;
         private Token _currentToken;
         
         public NewSpotifyProvider(

@@ -45,14 +45,8 @@ namespace PlayMe.Server.AutoPlay.CuratedAccounts
             // -- Source a user account
 
             var accountConfig = _followedAccountsRepository.GetRandomAccount();
-
-            var userPlaylists = client.GetUserPlaylists(accountConfig.User);
-
-            // -- Choose a playlist
-
-            var randomPlaylistIndex = _random.Next(userPlaylists.Items.Count);
-            var randomPlaylist = userPlaylists.Items[randomPlaylistIndex];
-            var fullPlaylist = client.GetPlaylist(randomPlaylist.Owner.Id, randomPlaylist.Id, null, LOCAL_MARKET);
+                        
+            var fullPlaylist = PickRandomPlaylist(accountConfig.User);
 
             // -- Choose a song from the playlist
 
@@ -78,6 +72,31 @@ namespace PlayMe.Server.AutoPlay.CuratedAccounts
 
         }
 
+        private FullPlaylist PickRandomPlaylist(string user)
+        {
+            var client = _spotify.GetClient();
+            
+            var userPlaylists = client.GetUserPlaylists(user);
+
+            // -- Choose a playlist
+            var randomPlaylistIndex = _random.Next(userPlaylists.Total);
+            var perPage = userPlaylists.Limit;
+            var page = (int)(randomPlaylistIndex / perPage); // Floor rounding - via int
+
+            var offset = page * perPage;
+
+            if (page != 0)
+            {
+                // If not on the first page - Paginate
+                
+                userPlaylists = client.GetUserPlaylists(user, perPage, page);
+            }
+
+            var randomPlaylist = userPlaylists.Items[randomPlaylistIndex - offset];
+            var fullPlaylist = client.GetPlaylist(randomPlaylist.Owner.Id, randomPlaylist.Id, null, LOCAL_MARKET);
+
+            return fullPlaylist;
+        }
 
         // TODO: Move this code to some common library
 
