@@ -301,7 +301,7 @@
     <Compile Include="UserSettings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="config\weightedAutoPlayConfig.config">
+    <None Include="config\weightedAutoPlay.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="config\followAccounts.config">

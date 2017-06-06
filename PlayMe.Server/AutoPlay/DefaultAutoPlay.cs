@@ -20,14 +20,14 @@ namespace PlayMe.Server.AutoPlay
         private readonly IRandomizerFactory randomizerFactory;
 
         public DefaultAutoPlay(
-            IMusicProviderFactory musicProviderFactory, 
+            IMusicProviderFactory musicProviderFactory,
             IDataService<MapReduceResult<TrackScore>> trackScoreDataService,
             IDataService<QueuedTrack> queuedTrackDataService,
             IRandomizerFactory randomizerFactory,
             Settings settings
             )
         {
-            
+
             this.trackScoreDataService = trackScoreDataService;
             this.queuedTrackDataService = queuedTrackDataService;
             this.musicProviderFactory = musicProviderFactory;
@@ -55,7 +55,7 @@ namespace PlayMe.Server.AutoPlay
 
             return track;
         }
-        
+
         private void FillBagWithAutoplayTracks(object stateInfo)
         {
             var scoredTracks = PickTracks();
@@ -79,11 +79,12 @@ namespace PlayMe.Server.AutoPlay
 
         private void FillBagWithLastTrack()
         {
-            var chosenTrack =queuedTrackDataService.GetAll()
-                .Where( t => !t.Vetoes.Any())
+            var chosenTrack = queuedTrackDataService.GetAll()
+                .Where(t => !t.Vetoes.Any())
                 .OrderByDescending(qt => qt.StartedPlayingDateTime)
                 .FirstOrDefault();
-            if(chosenTrack!=null){
+            if (chosenTrack != null)
+            {
                 _tracksForAutoplaying.Push(chosenTrack);
             }
         }
@@ -101,7 +102,7 @@ namespace PlayMe.Server.AutoPlay
         private IEnumerable<MapReduceResult<TrackScore>> PickTracks(double minMillisecondsSinceLastPlay)
         {
             return trackScoreDataService.GetAll()
-                .Where(s => !s.value.IsExcluded && s.value.MillisecondsSinceLastPlay > minMillisecondsSinceLastPlay)                
+                .Where(s => !s.value.IsExcluded && s.value.MillisecondsSinceLastPlay > minMillisecondsSinceLastPlay)
                 .OrderByDescending(s => s.value.Score)
                 .Take(settings.MaxAutoplayableTracks)
                 .ToList();
