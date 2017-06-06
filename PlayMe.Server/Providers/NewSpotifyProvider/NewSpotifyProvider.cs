@@ -31,7 +31,8 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
         {
             if (_client == null                
                 || IsTokenNearExpiry()
-                || _currentToken.IsExpired() // Safety fallback...
+                || (_currentToken != null 
+                    && _currentToken.IsExpired()) // Safety fallback...
                 )
             {
                 _client = CreateClient();
