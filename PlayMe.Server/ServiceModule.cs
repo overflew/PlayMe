@@ -151,7 +151,7 @@ namespace PlayMe.Server
             Bind<ICallbackClient>().To<CallbackClient>();
 
             // MultiAutoPlay bindings
-            Bind<IWeigtedAutoPlayRepository>().To<WeigtedAutoPlayRepository>();
+            Bind<IWeightedAutoPlayRepository>().To<WeightedAutoPlayRepository>();
         }
     }
 }

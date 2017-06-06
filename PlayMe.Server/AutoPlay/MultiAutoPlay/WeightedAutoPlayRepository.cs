@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace PlayMe.Server.AutoPlay.MultiAutoPlay
 {
-    public class WeigtedAutoPlayRepository : IWeigtedAutoPlayRepository
+    public class WeightedAutoPlayRepository : IWeightedAutoPlayRepository
     {
         public IList<IWeightedAutoPlay> GetAllAutoPlays()
         {

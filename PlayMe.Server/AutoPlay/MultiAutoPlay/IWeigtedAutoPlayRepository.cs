@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PlayMe.Server.AutoPlay.MultiAutoPlay
 {
-    public interface IWeigtedAutoPlayRepository
+    public interface IWeightedAutoPlayRepository
     {
         IList<IWeightedAutoPlay> GetAllAutoPlays();
     }

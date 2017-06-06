@@ -12,7 +12,7 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
         IList<IWeightedAutoPlay> autoPlayRepository;
         AutoPlayResolver autoPlayResolver;
 
-        public MultiAutoPlay(IWeigtedAutoPlayRepository autoPlayRepository, AutoPlayResolver autoPlayResolver)
+        public MultiAutoPlay(IWeightedAutoPlayRepository autoPlayRepository, AutoPlayResolver autoPlayResolver)
         {
             this.autoPlayRepository = autoPlayRepository.GetAllAutoPlays();
 
