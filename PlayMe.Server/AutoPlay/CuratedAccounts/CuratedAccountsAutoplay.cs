@@ -17,6 +17,7 @@ namespace PlayMe.Server.AutoPlay.CuratedAccounts
         private readonly ITrackMapper _trackMapper;
 
         const string CuratedPlaylistsDisplayName = "Autoplay - Curated accounts";
+        const string LoggingPrefix = "[CuratedAccounts]";
 
         // TODO: Move this out to external config. It's required in searches in order to populate 'IsPlayable' on tracks
         private const string LOCAL_MARKET = "NZ";
@@ -45,7 +46,7 @@ namespace PlayMe.Server.AutoPlay.CuratedAccounts
             // -- Source a user account
 
             var accountConfig = _followedAccountsRepository.GetRandomAccount();
-                        
+            
             var fullPlaylist = PickRandomPlaylist(accountConfig.User);
 
             // -- Choose a song from the playlist
@@ -77,6 +78,12 @@ namespace PlayMe.Server.AutoPlay.CuratedAccounts
             var client = _spotify.GetClient();
             
             var userPlaylists = client.GetUserPlaylists(user);
+            if (userPlaylists.HasError())
+            {
+                throw new NewSpotifyApiException(
+                    $"{LoggingPrefix} Unable to load user account: (User: '{user}')",
+                    userPlaylists.Error);
+            }
 
             // -- Choose a playlist
             var randomPlaylistIndex = _random.Next(userPlaylists.Total);
@@ -90,10 +97,23 @@ namespace PlayMe.Server.AutoPlay.CuratedAccounts
                 // If not on the first page - Paginate
                 
                 userPlaylists = client.GetUserPlaylists(user, perPage, page);
+                if (userPlaylists.HasError())
+                {
+                    throw new NewSpotifyApiException(
+                        $"{LoggingPrefix} Unable to get user playlist page: (User: '{user}', page: {page})",
+                        userPlaylists.Error);
+                }
             }
 
             var randomPlaylist = userPlaylists.Items[randomPlaylistIndex - offset];
+
             var fullPlaylist = client.GetPlaylist(randomPlaylist.Owner.Id, randomPlaylist.Id, null, LOCAL_MARKET);
+            if (fullPlaylist.HasError())
+            {
+                throw new NewSpotifyApiException(
+                    $"{LoggingPrefix} Unable to get full playlist: (User: '{randomPlaylist.Owner.DisplayName}', playlist: '{randomPlaylist.Name}' / {randomPlaylist.Id})",
+                    userPlaylists.Error);
+            }
 
             return fullPlaylist;
         }
@@ -137,8 +157,15 @@ namespace PlayMe.Server.AutoPlay.CuratedAccounts
             var indexAfterOffset = randomIndex - offset;
 
             var client = _spotify.GetClient();
+
             var paginatedTracks =
                 client.GetPlaylistTracks(playlist.Owner.Id, playlist.Id, null, 100, offset, LOCAL_MARKET);
+            if (paginatedTracks.HasError())
+            {
+                throw new NewSpotifyApiException(
+                    $"{LoggingPrefix} Unable to load playlist: (User: '{playlist.Owner.DisplayName}', playlist: '{playlist.Name}' / {playlist.Id}, page: {page})",
+                    paginatedTracks.Error);
+            }
 
             var randomTrack = paginatedTracks.Items[indexAfterOffset];
 

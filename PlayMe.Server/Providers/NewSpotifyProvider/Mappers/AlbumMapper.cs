@@ -35,7 +35,7 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
                 //Year = album..Year,
                 //ArtworkId = album.CoverId,
                 ArtworkUrlLarge = album.Images[0].Url, // TODO: Ensure sort order on images?
-                ArtworkUrlMedium = album.Images[1].Url,
+                ArtworkUrlMedium = album.Images[1].Url, // TODO: Check array size, to stop crashes
                 ArtworkUrlSmall = album.Images[2].Url,
                 IsAvailable = true, //album.IsAvailable,
                 //MusicProvider = musicProvider.Descriptor,
