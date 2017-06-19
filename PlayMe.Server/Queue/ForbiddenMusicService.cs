@@ -54,8 +54,13 @@ namespace PlayMe.Server.Queue
 
         private TrackBlockedReason TooRecentlyPlayedRule_CheckTrackScores(QueuedTrack track)
         {
-            var minTimeSpanSinceLastPlay = TimeSpan.FromHours(settings.DontRepeatTrackForHours);
+            if (settings.DontRepeatTrackForHours <= 0)
+            {
+                return null;
+            }
 
+            var minTimeSpanSinceLastPlay = TimeSpan.FromHours(settings.DontRepeatTrackForHours);
+            
             // Get Autoplay DB
             var x = trackScoreDataService
                 .GetAll()
@@ -95,11 +100,15 @@ namespace PlayMe.Server.Queue
 
         private TrackBlockedReason TrackHistoryRules_PlayedTooRecently(IList<QueuedTrack> recentlyPlayedInstances)
         {
-            var minTimeSpanSinceLastPlay = TimeSpan.FromHours(settings.DontRepeatTrackForHours);
-            var x = DateTime.Now.AddHours(-400);
+            if (settings.DontRepeatTrackForHours <= 0)
+            {
+                return null;
+            }
+
+            var mustHaveLastPlayedBefore = DateTime.Now.AddHours(-settings.DontRepeatTrackForHours);
 
             if (recentlyPlayedInstances
-                   .Where(t => t.StartedPlayingDateTime > x)
+                   .Where(t => t.StartedPlayingDateTime > mustHaveLastPlayedBefore)
                    .Any())
             {
                 return new TrackBlockedReason("Played too recently (Track history)");
