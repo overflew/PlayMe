@@ -27,7 +27,6 @@ namespace PlayMe.Server.AutoPlay
             Settings settings
             )
         {
-
             this.trackScoreDataService = trackScoreDataService;
             this.queuedTrackDataService = queuedTrackDataService;
             this.musicProviderFactory = musicProviderFactory;
@@ -37,16 +36,18 @@ namespace PlayMe.Server.AutoPlay
 
         public QueuedTrack FindTrack()
         {
+            // Note: No longer will queue 'last track played' when the queue is empty.
+            //       ^ As multi-autoplay will just get duplicates...
+
             if (_tracksForAutoplaying.Count <= settings.MinAutoplayableTracks)
             {
-                if (_tracksForAutoplaying.Count == 0)
+                FillBagWithAutoplayTracks(null);
+                if (!_tracksForAutoplaying.Any())
                 {
-                    //If we have no tracks, we're probably just starting the service, just get the last track played
-                    FillBagWithLastTrack();
+                    throw new Exception("Default autoplay could not load any tracks");
                 }
-                // Fill the bag as a non-blocking call
-                ThreadPool.QueueUserWorkItem(FillBagWithAutoplayTracks);
             }
+
             QueuedTrack track = null;
             if (_tracksForAutoplaying.LongCount() > 0)
             {
