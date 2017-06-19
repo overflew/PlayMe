@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PlayMe.Common.Model
 {
-    public class Album:PlayMeObject
+    [DebuggerDisplay("Album: {Name}")]
+    public class Album: PlayMeObject
     {        
         public Artist Artist { get; set; }
         public int Year { get; set; }

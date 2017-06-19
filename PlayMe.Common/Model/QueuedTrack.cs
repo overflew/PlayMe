@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PlayMe.Common.Model
 {
+    [DebuggerDisplay("Song: {Track.Name}")]
     public class QueuedTrack : SavedTrack
     {
-        private IList<Veto> vetoes=new List<Veto>();
+        private IList<Veto> vetoes = new List<Veto>();
         private IList<Like> likes = new List<Like>();
 
         public IList<Veto> Vetoes { 

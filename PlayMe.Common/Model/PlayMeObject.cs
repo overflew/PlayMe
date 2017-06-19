@@ -1,7 +1,9 @@
 using System;
+using System.Diagnostics;
 
 namespace PlayMe.Common.Model
 {
+    [DebuggerDisplay("{Name}")]
     public class PlayMeObject
     {
 
