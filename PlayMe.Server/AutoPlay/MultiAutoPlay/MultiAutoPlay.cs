@@ -8,6 +8,7 @@ using System.Threading;
 using PlayMe.Plumbing.Diagnostics;
 using PlayMe.Server.Providers.NewSpotifyProvider;
 using PlayMe.Server.Queue;
+using System.Linq;
 
 namespace PlayMe.Server.AutoPlay.MultiAutoplay
 {
@@ -86,6 +87,12 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
             }
         }
 
+        private bool isAlreadyQueued(QueuedTrack track)
+        {
+            return _tracksForAutoplaying.ToList()
+                .Where(t => t.Track.Link == track.Track.Link)
+                .Any();
+        }
 
         private QueuedTrack GetOneRandomTrack()
         {
@@ -106,6 +113,12 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
                         var canQueueTrack = _forbiddenMusicService.CanQueueTrack(track);
                         if (canQueueTrack != null) {
                             _logger.Info($"! - Not queueing track: {track.Track.Name}. Reason: {canQueueTrack.Reason}");
+                            continue;
+                        }
+
+                        if (isAlreadyQueued(track))
+                        {
+                            _logger.Info($"! - Not queueing track: {track.Track.Name}. Reason: It's already in the autoplay cache");
                             continue;
                         }
 
