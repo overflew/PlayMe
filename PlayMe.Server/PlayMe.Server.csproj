@@ -205,6 +205,8 @@
     <Compile Include="Providers\SoundCloud\ISoundCloudSettings.cs" />
     <Compile Include="Providers\SoundCloud\SoundCloudSettings.cs" />
     <Compile Include="Providers\SpotifyProvider\ISpotifySettings.cs" />
+    <Compile Include="Queue\ForbiddenMusicService.cs" />
+    <Compile Include="Queue\TrackBlockedReason.cs" />
     <Compile Include="UserService.cs" />
     <Compile Include="AutoPlay\DefaultAutoPlay.cs" />
     <Compile Include="AutoPlay\IAutoPlay.cs" />
@@ -302,18 +304,19 @@
     <Compile Include="UserSettings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="config\weightedAutoPlay.config">
+    <Content Include="config\weightedAutoPlay.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="config\followAccounts.config">
+    </Content>
+    <Content Include="config\followAccounts.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="config\playlists.config">
+    </Content>
+    <Content Include="config\playlists.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="PlayMe.Server_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

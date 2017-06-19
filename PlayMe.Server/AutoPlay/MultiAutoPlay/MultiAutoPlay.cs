@@ -7,6 +7,7 @@ using PlayMe.Server.AutoPlay.MultiAutoPlay;
 using System.Threading;
 using PlayMe.Plumbing.Diagnostics;
 using PlayMe.Server.Providers.NewSpotifyProvider;
+using PlayMe.Server.Queue;
 
 namespace PlayMe.Server.AutoPlay.MultiAutoplay
 {
@@ -17,6 +18,7 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
         private readonly IList<IWeightedAutoPlay> autoPlayRepository;
         private readonly AutoPlayResolver autoPlayResolver;
         private readonly NewSpotifyProvider _spotify;
+        private readonly IForbiddenMusicService _forbiddenMusicService;
         private readonly Logger _logger;
 
         // Set to a reasonable number to handle veto-battles
@@ -30,10 +32,12 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
             IWeightedAutoPlayRepository autoPlayRepository,
             AutoPlayResolver autoPlayResolver,
             NewSpotifyProvider spotify,
+            IForbiddenMusicService forbiddenMusicService,
             Logger logger)
         {
             _logger = logger;
             _spotify = spotify;
+            _forbiddenMusicService = forbiddenMusicService;
 
             this.autoPlayRepository = autoPlayRepository.GetAllAutoPlays();
 
@@ -97,7 +101,15 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
                     // 3) queue new track
                     lock (_querySongsLock) // Don't multi-request from our async thread
                     {
-                        return instance.FindTrack();
+                        var track = instance.FindTrack();
+
+                        var canQueueTrack = _forbiddenMusicService.CanQueueTrack(track);
+                        if (canQueueTrack != null) {
+                            _logger.Info($"! - Not queueing track: {track.Track.Name}. Reason: {canQueueTrack.Reason}");
+                            continue;
+                        }
+
+                        return track;
                     }
                 }
                 catch (NewSpotifyApiException ex)

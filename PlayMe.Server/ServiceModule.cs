@@ -62,6 +62,7 @@ namespace PlayMe.Server
             Bind<ISearchSuggestionService>().To<SearchSuggestionService>();
             Bind<IRickRollService>().To<RickRollService>();
             Bind<IRandomizerFactory>().To<RandomizerFactory>();
+            Bind<IForbiddenMusicService>().To<ForbiddenMusicService>();
 
             Bind<IBufferedPlayer>().To<BassBufferedPlayer>();
             Bind<IStreamedPlayer>().To<BassStreamedPlayer>();

@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayMe.Server", "PlayMe.Server\PlayMe.Server.csproj", "{2F1623C2-8F57-4C53-8C16-44668EA6E2CD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{DF33DADB-1C22-4FD7-90E0-582712C5BCEF} = {DF33DADB-1C22-4FD7-90E0-582712C5BCEF}
