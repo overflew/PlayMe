@@ -9,6 +9,7 @@ using PlayMe.Plumbing.Diagnostics;
 using PlayMe.Server.Providers.NewSpotifyProvider;
 using PlayMe.Server.Queue;
 using System.Linq;
+using PlayMe.Server.AutoPlay.Util;
 
 namespace PlayMe.Server.AutoPlay.MultiAutoplay
 {
@@ -20,21 +21,21 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
         private readonly AutoPlayResolver autoPlayResolver;
         private readonly NewSpotifyProvider _spotify;
         private readonly IForbiddenMusicService _forbiddenMusicService;
-        private readonly Logger _logger;
+        private readonly ILogger _logger;
 
         // Set to a reasonable number to handle veto-battles
         private const int TRACK_CACHE_SIZE = 5;
-        private const int GET_TRACK_RETRY_LIMIT = 5;
+        private const int GET_TRACK_RETRY_LIMIT = 15;
 
         private static Object _fillCacheLock = new Object();
-        private static Object _querySongsLock = new object();
+        private static Object _querySongsLock = new Object();
 
         public MultiAutoPlay(
             IWeightedAutoPlayRepository autoPlayRepository,
             AutoPlayResolver autoPlayResolver,
             NewSpotifyProvider spotify,
             IForbiddenMusicService forbiddenMusicService,
-            Logger logger)
+            ILogger logger)
         {
             _logger = logger;
             _spotify = spotify;
@@ -135,6 +136,11 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
                     }
 
                     _logger.Error($"[Multi autoplay] - Error getting track: {ex.Message} | {ex.SpotifyClientError.Message}");                    
+                }
+                catch(AutoplayBlockedException ex)
+                {
+                    // These are more tolerable - so just log as warning.
+                    _logger.Warn($"[Multi autoplay] {ex.Message}");
                 }
                 catch (Exception ex)
                 {

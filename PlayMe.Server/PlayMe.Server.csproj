@@ -146,6 +146,7 @@
     <Compile Include="AutoPlay\MultiAutoPlay\WeightedAutoPlayRepository.cs" />
     <Compile Include="AutoPlay\MultiAutoPlay\MultiAutoPlay.cs" />
     <Compile Include="AutoPlay\Recommendations\RecommendationsAutoplay.cs" />
+    <Compile Include="AutoPlay\Util\AutoplayBlockedException.cs" />
     <Compile Include="Broadcast\Broadcasters\Twitter\ITwitterSettings.cs" />
     <Compile Include="Broadcast\Broadcasters\Twitter\TwitterSettings.cs" />
     <Compile Include="Broadcast\BroadcastMessageRuleResolver.cs" />
