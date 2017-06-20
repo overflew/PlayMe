@@ -12,7 +12,7 @@ using PlayMe.Server.Providers.NewSpotifyProvider.Mappers;
 
 namespace PlayMe.Server.AutoPlay.Recommendations
 {
-    public class RecommendationsAutoplay : IAutoPlay
+    public class RecommendationsAutoplay : IStandAloneAutoPlay
     {
         private readonly NewSpotifyProvider _spotify;
         private readonly IDataService<QueuedTrack> _queuedTrackDataService;

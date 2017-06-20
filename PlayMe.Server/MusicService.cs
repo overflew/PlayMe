@@ -48,7 +48,7 @@ namespace PlayMe.Server
 
 	    public MusicService(ILogger logger,
 			IMusicProviderFactory musicProviderFactory,
-			IAutoPlay autoplayer,
+            IAutoPlay autoplayer,
             IDataService<QueuedTrack> queuedTrackDataService,
 			IDataService<User> adminUserDataService,
 			ISearchSuggestionService searchSuggestionService,

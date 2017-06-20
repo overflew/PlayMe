@@ -138,6 +138,9 @@
     <Compile Include="AutoPlay\CuratedPlaylists\Config\IPlaylist.cs" />
     <Compile Include="AutoPlay\CuratedPlaylists\CuratedPlaylistsAutoplay.cs" />
     <Compile Include="AutoPlay\CuratedPlaylists\PlaylistRepository.cs" />
+<<<<<<< HEAD
+    <Compile Include="AutoPlay\Recommendations\RecommendationsAutoplay.cs" />
+=======
     <Compile Include="AutoPlay\IStandAloneAutoPlay.cs" />
     <Compile Include="AutoPlay\MultiAutoPlay\AutoPlayResolver.cs" />
     <Compile Include="AutoPlay\MultiAutoPlay\Config\IWeightedAutoPlay.cs" />
@@ -145,7 +148,7 @@
     <Compile Include="AutoPlay\MultiAutoPlay\IWeigtedAutoPlayRepository.cs" />
     <Compile Include="AutoPlay\MultiAutoPlay\WeightedAutoPlayRepository.cs" />
     <Compile Include="AutoPlay\MultiAutoPlay\MultiAutoPlay.cs" />
-    <Compile Include="AutoPlay\Recommendations\RecommendationsAutoplay.cs" />
+>>>>>>> Autoplay-CuratedPlaylists
     <Compile Include="Broadcast\Broadcasters\Twitter\ITwitterSettings.cs" />
     <Compile Include="Broadcast\Broadcasters\Twitter\TwitterSettings.cs" />
     <Compile Include="Broadcast\BroadcastMessageRuleResolver.cs" />

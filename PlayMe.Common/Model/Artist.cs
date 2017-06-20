@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PlayMe.Common.Model
 {
+    [DebuggerDisplay("Artist: {Name}")]
     public class Artist : PlayMeObject
     {
         public enum LoadedState

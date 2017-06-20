@@ -10,7 +10,7 @@ using PlayMe.Server.Providers;
 
 namespace PlayMe.Server.AutoPlay
 {
-    public class DefaultAutoPlay : IAutoPlay
+    public class DefaultAutoPlay : IStandAloneAutoPlay
     {
         private readonly IDataService<MapReduceResult<TrackScore>> trackScoreDataService;
         private readonly IDataService<QueuedTrack> queuedTrackDataService;
@@ -20,14 +20,13 @@ namespace PlayMe.Server.AutoPlay
         private readonly IRandomizerFactory randomizerFactory;
 
         public DefaultAutoPlay(
-            IMusicProviderFactory musicProviderFactory, 
+            IMusicProviderFactory musicProviderFactory,
             IDataService<MapReduceResult<TrackScore>> trackScoreDataService,
             IDataService<QueuedTrack> queuedTrackDataService,
             IRandomizerFactory randomizerFactory,
             Settings settings
             )
         {
-            
             this.trackScoreDataService = trackScoreDataService;
             this.queuedTrackDataService = queuedTrackDataService;
             this.musicProviderFactory = musicProviderFactory;
@@ -37,16 +36,18 @@ namespace PlayMe.Server.AutoPlay
 
         public QueuedTrack FindTrack()
         {
+            // Note: No longer will queue 'last track played' when the queue is empty.
+            //       ^ As multi-autoplay will just get duplicates...
+
             if (_tracksForAutoplaying.Count <= settings.MinAutoplayableTracks)
             {
-                if (_tracksForAutoplaying.Count == 0)
+                FillBagWithAutoplayTracks(null);
+                if (!_tracksForAutoplaying.Any())
                 {
-                    //If we have no tracks, we're probably just starting the service, just get the last track played
-                    FillBagWithLastTrack();
+                    throw new Exception("Default autoplay could not load any tracks");
                 }
-                // Fill the bag as a non-blocking call
-                ThreadPool.QueueUserWorkItem(FillBagWithAutoplayTracks);
             }
+
             QueuedTrack track = null;
             if (_tracksForAutoplaying.LongCount() > 0)
             {
@@ -55,7 +56,7 @@ namespace PlayMe.Server.AutoPlay
 
             return track;
         }
-        
+
         private void FillBagWithAutoplayTracks(object stateInfo)
         {
             var scoredTracks = PickTracks();
@@ -79,11 +80,12 @@ namespace PlayMe.Server.AutoPlay
 
         private void FillBagWithLastTrack()
         {
-            var chosenTrack =queuedTrackDataService.GetAll()
-                .Where( t => !t.Vetoes.Any())
+            var chosenTrack = queuedTrackDataService.GetAll()
+                .Where(t => !t.Vetoes.Any())
                 .OrderByDescending(qt => qt.StartedPlayingDateTime)
                 .FirstOrDefault();
-            if(chosenTrack!=null){
+            if (chosenTrack != null)
+            {
                 _tracksForAutoplaying.Push(chosenTrack);
             }
         }
@@ -101,7 +103,7 @@ namespace PlayMe.Server.AutoPlay
         private IEnumerable<MapReduceResult<TrackScore>> PickTracks(double minMillisecondsSinceLastPlay)
         {
             return trackScoreDataService.GetAll()
-                .Where(s => !s.value.IsExcluded && s.value.MillisecondsSinceLastPlay > minMillisecondsSinceLastPlay)                
+                .Where(s => !s.value.IsExcluded && s.value.MillisecondsSinceLastPlay > minMillisecondsSinceLastPlay)
                 .OrderByDescending(s => s.value.Score)
                 .Take(settings.MaxAutoplayableTracks)
                 .ToList();

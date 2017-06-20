@@ -34,13 +34,28 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
                 Name = album.Name,
                 //Year = album..Year,
                 //ArtworkId = album.CoverId,
-                ArtworkUrlLarge = album.Images[0].Url, // TODO: Ensure sort order on images?
-                ArtworkUrlMedium = album.Images[1].Url,
-                ArtworkUrlSmall = album.Images[2].Url,
                 IsAvailable = true, //album.IsAvailable,
                 //MusicProvider = musicProvider.Descriptor,
                 ExternalLink = new Uri(album.ExternalUrls["spotify"])
             };
+
+            if (album.Images != null)
+            {
+                if (album.Images.Count >= 1)
+                {
+                    albumResult.ArtworkUrlLarge = album.Images[0].Url;
+                }
+
+                if (album.Images.Count >= 2)
+                {
+                    albumResult.ArtworkUrlMedium = album.Images[1].Url;
+                }
+
+                if (album.Images.Count >= 3)
+                {
+                    albumResult.ArtworkUrlSmall = album.Images[2].Url;
+                }
+            }
 
             return albumResult;
 

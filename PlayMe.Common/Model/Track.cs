@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PlayMe.Common.Model
 {
+    [DebuggerDisplay("Song: {Name}")]
     public class Track : PlayMeObject
     {        
         public IEnumerable<Artist> Artists { get; set; }
