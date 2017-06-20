@@ -33,6 +33,7 @@ namespace PlayMe.Server.AutoPlay.Recommendations
         private const int POINTS_USER_QUEUED = 1;
         private const int POINTS_LIKE = 1;
         private const int POINTS_VETO = -1;
+        private const int LIKE_TO_VETO_SEED_ACCEPTANCE_RATIO = 3;
 
         // TODO: Move this out to external config. It's required in searches in order to populate 'IsPlayable' on tracks
         private const string LOCAL_MARKET = "NZ";
@@ -117,7 +118,20 @@ namespace PlayMe.Server.AutoPlay.Recommendations
         private IList<QueuedTrack> PickRandomSeedTracks()
         {
             var recentTracks = PickSeedableTracksFromHistory();
-            
+
+            var contentiousTracksToRemove =
+                recentTracks.Where(t => t.Vetoes.Any()
+                                        && (t.Likes.Count() / t.Vetoes.Count() < LIKE_TO_VETO_SEED_ACCEPTANCE_RATIO)).ToList();
+            if (contentiousTracksToRemove.Any())
+            {
+                _logger.Debug($"! Removed {contentiousTracksToRemove.Count()} tracks from the seeds");
+                recentTracks = recentTracks.Except(contentiousTracksToRemove).ToList();
+            }
+            if (!recentTracks.Any())
+            {
+                throw new AutoplayBlockedException("No seeds remaining for recommendation");
+            }
+
             recentTracks.Shuffle();
 
             return recentTracks.Take(1).ToList();
@@ -138,9 +152,10 @@ namespace PlayMe.Server.AutoPlay.Recommendations
         private IList<QueuedTrack> PickSeedableTracksFromHistory_QueuedByAutoplay()
         {
             var seedTracks = _queuedTrackDataService.GetAll()
-                .Where(t => t.User.StartsWith("Autoplay")
-                            && t.Likes.Any()
-                            && t.IsSkipped == false)
+                .Where(t => 
+                    t.User.StartsWith("Autoplay")
+                    && t.Likes.Any()
+                    && !t.IsSkipped)
                 .OrderByDescending(t => t.StartedPlayingDateTime)
                 .Take(SEED_TRACKS_AUTOPLAY)
                 .ToList();
@@ -151,8 +166,9 @@ namespace PlayMe.Server.AutoPlay.Recommendations
         private IList<QueuedTrack> PickSeedableTracksFromHistory_QueuedByUsers()
         {
             var seedTracks = _queuedTrackDataService.GetAll()
-                .Where(t => !t.User.StartsWith("Autoplay")
-                            && t.IsSkipped == false)
+                .Where(t => 
+                    !t.User.StartsWith("Autoplay")
+                    && !t.IsSkipped)
                 .OrderByDescending(t => t.StartedPlayingDateTime)
                 .Take(SEED_TRACKS_USER_QUEUED)
                 .ToList();
