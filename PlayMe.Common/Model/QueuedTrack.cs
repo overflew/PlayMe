@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using PlayMe.Server.AutoPlay.Meta;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -17,7 +19,7 @@ namespace PlayMe.Common.Model
             } 
             set 
             {
-                vetoes=value;
+                vetoes = value;
             } 
         }
 
@@ -72,5 +74,8 @@ namespace PlayMe.Common.Model
         /// Optional freetext reason for queueing this track
         /// </summary>
         public string Reason { get; set; }
+
+        [BsonIgnoreIfNull]
+        public AutoplayMetaInfo AutoplayMetaInfo { get; set; }
     }
 }

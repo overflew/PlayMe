@@ -8,6 +8,7 @@ using PlayMe.Plumbing.Diagnostics;
 using PlayMe.Server.Providers.NewSpotifyProvider;
 using PlayMe.Server.Providers.NewSpotifyProvider.Mappers;
 using SpotifyAPI.Web.Models;
+using PlayMe.Server.AutoPlay.Meta;
 
 namespace PlayMe.Server.AutoPlay.CuratedPlaylists
 {
@@ -16,6 +17,7 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
         // User name to appear in the UI
         const string CuratedPlaylistsDisplayName = "Autoplay - Curated playlists";
         const string LoggingPrefix = "[CuratedPlaylists]";
+        const string AnalysisId = "[CuratedPlaylists]";
 
         // TODO: Move this out to external config. It's required in searches in order to populate 'IsPlayable' on tracks
         private const string LOCAL_MARKET = "NZ";
@@ -72,7 +74,7 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
             // -- Map it to the business models
             var mappedTrack = _trackMapper.Map(randomTrack.Track, CuratedPlaylistsDisplayName, true, true);
             
-            return new QueuedTrack()
+            var result = new QueuedTrack()
             {
                 Track = mappedTrack,
 
@@ -80,6 +82,22 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
                 User = CuratedPlaylistsDisplayName,
                 Reason = $"Playlist: {playlist.Name}"
             };
+
+            result.AutoplayMetaInfo = new AutoplayMetaInfo()
+            {
+                AutoplayNameId = AnalysisId,
+                MetaInfo = new MetaInfo()
+                {
+                    PlaylistId = playlist.Id,
+                    PlaylistName = playlist.Name,
+                    AccountId = playlist.Owner.Id,
+                    SpotifyUri = playlist.Uri
+
+                    // AccountName = playlist.Owner.DisplayName, // We don't have the account name from that query
+                }
+            };
+
+            return result;
 
         }
 

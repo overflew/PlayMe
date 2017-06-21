@@ -13,6 +13,7 @@ using PlayMe.Server.AutoPlay.Util;
 using PlayMe.Plumbing.Diagnostics;
 using Nerdle.AutoConfig;
 using System.Diagnostics;
+using PlayMe.Server.AutoPlay.Meta;
 
 namespace PlayMe.Server.AutoPlay.Recommendations
 {
@@ -36,7 +37,9 @@ namespace PlayMe.Server.AutoPlay.Recommendations
 
         const string AutoplayDisplayName = "Autoplay - Recommendations";
         private const string LoggingPrefix = "[RecommendationsAutoplay]";
-        
+        private const string AnalysisId = "[RecommendationsAutoplay]";
+
+
         // TODO: Move this out to external config. It's required in searches in order to populate 'IsPlayable' on tracks
         private const string LOCAL_MARKET = "NZ";
 
@@ -109,7 +112,8 @@ namespace PlayMe.Server.AutoPlay.Recommendations
             var mappedTrack = _trackMapper.Map(chosenTrackFull, AutoplayDisplayName, true, true);
 
             var seedString = string.Join(",", seedTracks.Select(s => $"{s.Track.Artists.First().Name} - {s.Track.Name}"));
-            return new QueuedTrack()
+
+            var result = new QueuedTrack()
             {
                 Track = mappedTrack,
 
@@ -117,6 +121,23 @@ namespace PlayMe.Server.AutoPlay.Recommendations
                 User = AutoplayDisplayName,
                 Reason = $"Seed: {seedString}"
             };
+
+            result.AutoplayMetaInfo = new AutoplayMetaInfo()
+            {
+                AutoplayNameId = AnalysisId,
+                MetaInfo = new MetaInfo()
+                {
+                    SeedTracks = seedTracks.Select(t => new BasicTrack()
+                    {
+                        TrackId = t.Track.Link,
+                        TrackName = t.Track.Name,
+                        ArtistId = t.Track.Artists.First().Link,
+                        ArtistName = t.Track.Artists.First().Name
+                    })
+                }
+            };
+
+            return result;
         }
 
         private IList<QueuedTrack> PickRandomSeedTracks()
