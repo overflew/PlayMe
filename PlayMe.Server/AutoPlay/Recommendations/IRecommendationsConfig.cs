@@ -13,5 +13,11 @@ namespace PlayMe.Server.AutoPlay.Recommendations
         int AutoplayPopularSeeds { get; }
 
         int LikeToVetoSeedAcceptanceRatio { get; }
+
+        int PointsBase { get; }
+
+        int PointsForAnyLikes { get; }
+
+        int PointsForAnyVetoes { get; }
     }
 }

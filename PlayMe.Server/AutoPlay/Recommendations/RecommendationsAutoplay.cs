@@ -12,9 +12,18 @@ using PlayMe.Server.Providers.NewSpotifyProvider.Mappers;
 using PlayMe.Server.AutoPlay.Util;
 using PlayMe.Plumbing.Diagnostics;
 using Nerdle.AutoConfig;
+using System.Diagnostics;
 
 namespace PlayMe.Server.AutoPlay.Recommendations
 {
+    [DebuggerDisplay(" Weight: {Weight}. Queued by: {track.User}. Track: {track.Track.Name}")]
+    class WeightedTrack: IWeighted
+    {
+        public QueuedTrack track { get; set; }
+
+        public int Weight { get; set; }
+    }
+
     public class RecommendationsAutoplay : IStandAloneAutoPlay
     {
         private readonly NewSpotifyProvider _spotify;
@@ -112,26 +121,55 @@ namespace PlayMe.Server.AutoPlay.Recommendations
 
         private IList<QueuedTrack> PickRandomSeedTracks()
         {
-            var recentTracks = PickSeedableTracksFromHistory();
+            var seedTracks = PickSeedableTracksFromHistory();
 
             var contentiousTracksToRemove =
-                recentTracks.Where(t => t.Vetoes.Any()
+                seedTracks.Where(t => t.Vetoes.Any()
                                         && (t.Likes.Count() / t.Vetoes.Count() < _recommendationsConfig.LikeToVetoSeedAcceptanceRatio)).ToList();
             if (contentiousTracksToRemove.Any())
             {
                 _logger.Debug($"! Removed {contentiousTracksToRemove.Count()} tracks from the seeds");
-                recentTracks = recentTracks.Except(contentiousTracksToRemove).ToList();
+                seedTracks = seedTracks.Except(contentiousTracksToRemove).ToList();
             }
-            if (!recentTracks.Any())
+            if (!seedTracks.Any())
             {
                 throw new AutoplayBlockedException("No seeds remaining for recommendation");
             }
 
-            recentTracks.Shuffle();
+            // Pick a random track
+            var weightedTracks = seedTracks.Select(t =>
+                new WeightedTrack()
+                {
+                    track = t,
+                    Weight = CalculateSeedWeight(t)
+                }).ToList();
 
-            return recentTracks.Take(1).ToList();
+            var pickTrack = WeightingUtil.ChooseWeightedRandom(weightedTracks);
 
-            // FUTURE: Get multiple seeds - based on artist genre.            
+            // For now - keep it simple with one seed
+            return new List<QueuedTrack>() { pickTrack.track };
+
+            // FUTURE: Get multiple seeds - grouped on artist genre?
+        }
+
+        private int CalculateSeedWeight(QueuedTrack track)
+        {
+            // Keeping this super-simple for now.
+            // If it's liked, it should be more likely to be seeded with
+            // Note: The priority of user-queued vs. autoplay-queued songs is done with other parameters
+            var weight = _recommendationsConfig.PointsBase;
+
+            if (track.Likes.Any())
+            {
+                weight += _recommendationsConfig.PointsForAnyLikes;
+            }
+
+            if (track.Vetoes.Any())
+            {
+                weight += _recommendationsConfig.PointsForAnyVetoes;
+            }
+
+            return weight;
         }
 
         private IList<QueuedTrack> PickSeedableTracksFromHistory()
