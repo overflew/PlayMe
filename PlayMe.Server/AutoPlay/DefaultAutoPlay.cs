@@ -19,6 +19,8 @@ namespace PlayMe.Server.AutoPlay
         private readonly IMusicProviderFactory musicProviderFactory;
         private readonly IRandomizerFactory randomizerFactory;
 
+        private const string AnalysisId = "[DefaultAutoplay]";
+
         public DefaultAutoPlay(
             IMusicProviderFactory musicProviderFactory,
             IDataService<MapReduceResult<TrackScore>> trackScoreDataService,
@@ -53,6 +55,13 @@ namespace PlayMe.Server.AutoPlay
             {
                 track = randomizerFactory.Randomize.Execute(_tracksForAutoplaying.Pop());
             }
+
+            // Reset this audit stuff. 
+            // As it's picking up what was saved to the DB, there's a chance it would maybe have old audit data on it?
+            track.AutoplayMetaInfo = new Meta.AutoplayMetaInfo()
+            {
+                AutoplayNameId = AnalysisId
+            };
 
             return track;
         }
