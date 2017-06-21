@@ -11,6 +11,7 @@ using PlayMe.Server.Providers.NewSpotifyProvider;
 using PlayMe.Server.Providers.NewSpotifyProvider.Mappers;
 using PlayMe.Server.AutoPlay.Util;
 using PlayMe.Plumbing.Diagnostics;
+using Nerdle.AutoConfig;
 
 namespace PlayMe.Server.AutoPlay.Recommendations
 {
@@ -20,21 +21,13 @@ namespace PlayMe.Server.AutoPlay.Recommendations
         private readonly IDataService<QueuedTrack> _queuedTrackDataService;
         private readonly ITrackMapper _trackMapper;
         private readonly ILogger _logger;
+        private readonly IRecommendationsConfig _recommendationsConfig;
 
         private readonly Random _random;
 
         const string AutoplayDisplayName = "Autoplay - Recommendations";
         private const string LoggingPrefix = "[RecommendationsAutoplay]";
         
-        // TODO: Make these configurable
-        private const int SEED_TRACKS_USER_QUEUED = 15;
-        private const int SEED_TRACKS_AUTOPLAY = 10;
-
-        private const int POINTS_USER_QUEUED = 1;
-        private const int POINTS_LIKE = 1;
-        private const int POINTS_VETO = -1;
-        private const int LIKE_TO_VETO_SEED_ACCEPTANCE_RATIO = 3;
-
         // TODO: Move this out to external config. It's required in searches in order to populate 'IsPlayable' on tracks
         private const string LOCAL_MARKET = "NZ";
 
@@ -50,6 +43,8 @@ namespace PlayMe.Server.AutoPlay.Recommendations
             _queuedTrackDataService = queuedTrackDataService;
             _trackMapper = trackMapper;
             _logger = logger;
+
+            _recommendationsConfig = AutoConfig.Map<IRecommendationsConfig>();
 
             _random = new Random();
         }
@@ -121,7 +116,7 @@ namespace PlayMe.Server.AutoPlay.Recommendations
 
             var contentiousTracksToRemove =
                 recentTracks.Where(t => t.Vetoes.Any()
-                                        && (t.Likes.Count() / t.Vetoes.Count() < LIKE_TO_VETO_SEED_ACCEPTANCE_RATIO)).ToList();
+                                        && (t.Likes.Count() / t.Vetoes.Count() < _recommendationsConfig.LikeToVetoSeedAcceptanceRatio)).ToList();
             if (contentiousTracksToRemove.Any())
             {
                 _logger.Debug($"! Removed {contentiousTracksToRemove.Count()} tracks from the seeds");
@@ -157,7 +152,7 @@ namespace PlayMe.Server.AutoPlay.Recommendations
                     && t.Likes.Any()
                     && !t.IsSkipped)
                 .OrderByDescending(t => t.StartedPlayingDateTime)
-                .Take(SEED_TRACKS_AUTOPLAY)
+                .Take(_recommendationsConfig.AutoplayPopularSeeds)
                 .ToList();
 
             return seedTracks;
@@ -170,7 +165,7 @@ namespace PlayMe.Server.AutoPlay.Recommendations
                     !t.User.StartsWith("Autoplay")
                     && !t.IsSkipped)
                 .OrderByDescending(t => t.StartedPlayingDateTime)
-                .Take(SEED_TRACKS_USER_QUEUED)
+                .Take(_recommendationsConfig.UserTracksSeeds)
                 .ToList();
 
             return seedTracks;
