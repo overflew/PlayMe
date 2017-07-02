@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,17 +11,23 @@ namespace PlayMe.Server.AutoPlay.Meta
     public class MetaInfo
     {
         // -- Account/playlist:
+        [BsonIgnoreIfNull]
         public string AccountName { get; set; }
 
+        [BsonIgnoreIfNull]
         public string AccountId { get; set; }
 
+        [BsonIgnoreIfNull]
         public string PlaylistName { get; set; }
 
+        [BsonIgnoreIfNull]
         public string PlaylistId { get; set; }
 
+        [BsonIgnoreIfNull]
         public string SpotifyUri { get; set; }
 
         // -- For recommendations stuff:
+        [BsonIgnoreIfNull]
         public IEnumerable<BasicTrack> SeedTracks { get; set; }
     }
 
