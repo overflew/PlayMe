@@ -30,6 +30,7 @@ using PlayMe.Server.AutoPlay.CuratedPlaylists;
 using PlayMe.Server.AutoPlay.MultiAutoPlay;
 using PlayMe.Server.AutoPlay.Recommendations;
 using PlayMe.Server.AutoPlay.MultiAutoplay;
+using PlayMe.Server.AutoPlay.UseMachineLearningApi;
 
 namespace PlayMe.Server
 {
@@ -59,7 +60,8 @@ namespace PlayMe.Server
             Bind<IStandAloneAutoPlay>().To<CuratedPlaylistsAutoplay>();
             Bind<IStandAloneAutoPlay>().To<CuratedAccountsAutoplay>();
             Bind<IStandAloneAutoPlay>().To<RecommendationsAutoplay>();
-            
+            Bind<IStandAloneAutoPlay>().To<UseMachineLearningApiAutoplay>();
+
             Bind<ISearchSuggestionService>().To<SearchSuggestionService>();
             Bind<IRickRollService>().To<RickRollService>();
             Bind<IRandomizerFactory>().To<RandomizerFactory>();

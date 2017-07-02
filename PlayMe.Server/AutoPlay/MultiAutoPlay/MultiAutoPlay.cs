@@ -24,7 +24,7 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
         private readonly ILogger _logger;
 
         // Set to a reasonable number to handle veto-battles
-        private const int TRACK_CACHE_SIZE = 5;
+        private const int TRACK_CACHE_SIZE = 1; // TEMP! Return to 5 when finished
         private const int GET_TRACK_RETRY_LIMIT = 15;
 
         private static Object _fillCacheLock = new Object();
@@ -111,7 +111,8 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
                     {
                         var track = instance.FindTrack();
 
-                        var canQueueTrack = _forbiddenMusicService.CanQueueTrack(track);
+                        // TEMP! Allow duplicates, while developing MachineLearning autoplay
+                        /*var canQueueTrack = _forbiddenMusicService.CanQueueTrack(track);
                         if (canQueueTrack != null) {
                             _logger.Info($"! - Not queueing track: {track.Track.Name}. Reason: {canQueueTrack.Reason}");
                             continue;
@@ -121,7 +122,7 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
                         {
                             _logger.Info($"! - Not queueing track: {track.Track.Name}. Reason: It's already in the autoplay cache");
                             continue;
-                        }
+                        }*/
 
                         return track;
                     }

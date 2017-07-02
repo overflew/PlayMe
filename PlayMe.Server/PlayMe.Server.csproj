@@ -147,6 +147,10 @@
     <Compile Include="AutoPlay\MultiAutoPlay\MultiAutoPlay.cs" />
     <Compile Include="AutoPlay\Recommendations\RecommendationsAutoplay.cs" />
     <Compile Include="AutoPlay\Recommendations\IRecommendationsConfig.cs" />
+    <Compile Include="AutoPlay\UseMachineLearningApi\MachineLearningApiService.cs" />
+    <Compile Include="AutoPlay\UseMachineLearningApi\TrackSeed.cs" />
+    <Compile Include="AutoPlay\UseMachineLearningApi\UseMachineLearningApiAutoplay.cs" />
+    <Compile Include="AutoPlay\UseMachineLearningApi\UseMachineLearningResolver.cs" />
     <Compile Include="AutoPlay\Util\AutoplayBlockedException.cs" />
     <Compile Include="Broadcast\Broadcasters\Twitter\ITwitterSettings.cs" />
     <Compile Include="Broadcast\Broadcasters\Twitter\TwitterSettings.cs" />
