@@ -11,6 +11,7 @@ using PlayMe.Data;
 using PlayMe.Data.Mongo;
 using PlayMe.Plumbing.Diagnostics;
 using PlayMe.Server.AutoPlay;
+using PlayMe.Server.AutoPlay.CuratedAccounts;
 using PlayMe.Server.AutoPlay.TrackRandomizers;
 using PlayMe.Server.Helpers;
 using PlayMe.Server.Helpers.Interfaces;
@@ -25,6 +26,11 @@ using PlayMe.Server.Queue.Interfaces;
 using PlayMe.Server.ServiceModel;
 using PlayMe.Server.SoundBoard;
 using Logger = PlayMe.Plumbing.Diagnostics.Logger;
+using PlayMe.Server.AutoPlay.CuratedPlaylists;
+using PlayMe.Server.AutoPlay.MultiAutoPlay;
+using PlayMe.Server.AutoPlay.Recommendations;
+using PlayMe.Server.AutoPlay.MultiAutoplay;
+
 namespace PlayMe.Server
 {
     public class ServiceModule : NinjectModule
@@ -41,11 +47,23 @@ namespace PlayMe.Server
                 .ToMethod(ctx => serviceType => ctx.Kernel.Get<NinjectInstanceProvider>(new ConstructorArgument("serviceType", serviceType)));
 
             Bind<IMusicProviderFactory>().To<MusicProviderFactory>().InSingletonScope();
+
+            Bind<IAutoPlay>().To<MultiAutoPlay>();
+
+            // NB: Original autoplay...
+            // Bind<IAutoPlay>().To<DefaultAutoPlay>();
+
+            // Binding standalone autoplays for multiAutoPlay
+            // Discover all autoPlays implementing IStandAloneAutoPlay
+            Bind<IStandAloneAutoPlay>().To<DefaultAutoPlay>();
+            Bind<IStandAloneAutoPlay>().To<CuratedPlaylistsAutoplay>();
+            Bind<IStandAloneAutoPlay>().To<CuratedAccountsAutoplay>();
+            Bind<IStandAloneAutoPlay>().To<RecommendationsAutoplay>();
             
-            Bind<IAutoPlay>().To<DefaultAutoPlay>();
             Bind<ISearchSuggestionService>().To<SearchSuggestionService>();
             Bind<IRickRollService>().To<RickRollService>();
             Bind<IRandomizerFactory>().To<RandomizerFactory>();
+            Bind<IForbiddenMusicService>().To<ForbiddenMusicService>();
 
             Bind<IBufferedPlayer>().To<BassBufferedPlayer>();
             Bind<IStreamedPlayer>().To<BassStreamedPlayer>();
@@ -133,6 +151,9 @@ namespace PlayMe.Server
             Bind<IUserService>().To<UserService>();
             Bind<IUserSettings>().To<UserSettings>();
             Bind<ICallbackClient>().To<CallbackClient>();
+
+            // MultiAutoPlay bindings
+            Bind<IWeightedAutoPlayRepository>().To<WeightedAutoPlayRepository>();
         }
     }
 }
