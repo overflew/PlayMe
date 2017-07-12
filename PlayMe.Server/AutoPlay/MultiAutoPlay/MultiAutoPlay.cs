@@ -10,12 +10,13 @@ using PlayMe.Server.Providers.NewSpotifyProvider;
 using PlayMe.Server.Queue;
 using System.Linq;
 using PlayMe.Server.AutoPlay.Util;
+using System.Collections.Concurrent;
 
 namespace PlayMe.Server.AutoPlay.MultiAutoplay
 {
     public class MultiAutoPlay : IAutoPlay
     {
-        private readonly Stack<QueuedTrack> _tracksForAutoplaying = new Stack<QueuedTrack>();
+        private readonly ConcurrentStack<QueuedTrack> _tracksForAutoplaying = new ConcurrentStack<QueuedTrack>();
 
         private readonly IList<IWeightedAutoPlay> autoPlayRepository;
         private readonly AutoPlayResolver autoPlayResolver;
@@ -60,7 +61,9 @@ namespace PlayMe.Server.AutoPlay.MultiAutoplay
             }
 
             FillCacheAsync(); // Keep cache topped up
-            return _tracksForAutoplaying.Pop();
+            QueuedTrack result;
+            _tracksForAutoplaying.TryPop(out result);
+            return result;
         }
 
         private void FillCacheAsync()

@@ -7,6 +7,7 @@ using PlayMe.Data;
 using PlayMe.Data.Mongo;
 using PlayMe.Server.AutoPlay.TrackRandomizers;
 using PlayMe.Server.Providers;
+using System.Collections.Concurrent;
 
 namespace PlayMe.Server.AutoPlay
 {
@@ -14,7 +15,7 @@ namespace PlayMe.Server.AutoPlay
     {
         private readonly IDataService<MapReduceResult<TrackScore>> trackScoreDataService;
         private readonly IDataService<QueuedTrack> queuedTrackDataService;
-        private readonly Stack<QueuedTrack> _tracksForAutoplaying = new Stack<QueuedTrack>();
+        private readonly ConcurrentStack<QueuedTrack> _tracksForAutoplaying = new ConcurrentStack<QueuedTrack>();
         private readonly Settings settings;
         private readonly IMusicProviderFactory musicProviderFactory;
         private readonly IRandomizerFactory randomizerFactory;
@@ -51,9 +52,9 @@ namespace PlayMe.Server.AutoPlay
             }
 
             QueuedTrack track = null;
-            if (_tracksForAutoplaying.LongCount() > 0)
+            if (_tracksForAutoplaying.TryPop(out track))
             {
-                track = randomizerFactory.Randomize.Execute(_tracksForAutoplaying.Pop());
+                randomizerFactory.Randomize.Execute(track);
             }
 
             // Reset this audit stuff. 
