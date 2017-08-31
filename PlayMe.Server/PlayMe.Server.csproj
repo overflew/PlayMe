@@ -147,6 +147,8 @@
     <Compile Include="AutoPlay\MultiAutoPlay\MultiAutoPlay.cs" />
     <Compile Include="AutoPlay\Recommendations\RecommendationsAutoplay.cs" />
     <Compile Include="AutoPlay\Recommendations\IRecommendationsConfig.cs" />
+    <Compile Include="AutoPlay\Songkick\ISongkickConfig.cs" />
+    <Compile Include="AutoPlay\Songkick\SongkickAutoplay.cs" />
     <Compile Include="AutoPlay\Util\AutoplayBlockedException.cs" />
     <Compile Include="Broadcast\Broadcasters\Twitter\ITwitterSettings.cs" />
     <Compile Include="Broadcast\Broadcasters\Twitter\TwitterSettings.cs" />
@@ -309,6 +311,7 @@
   <ItemGroup>
     <Content Include="config\weightedAutoPlay.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="config\followAccounts.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -319,6 +322,10 @@
     <Content Include="config\recommendations.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="config\songkick.config">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
