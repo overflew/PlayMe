@@ -50,6 +50,7 @@ namespace PlayMe.Server.AutoPlay.Songkick.SongkickApi
     [DebuggerDisplay("{DisplayName}")]
     public class Artist
     {
+        public int Id { get; set; }
         
         public string DisplayName { get; set; }
 

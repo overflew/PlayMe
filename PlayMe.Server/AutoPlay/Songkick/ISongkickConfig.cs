@@ -12,8 +12,6 @@ namespace PlayMe.Server.AutoPlay.Songkick
 
         int RegionId { get; }
 
-        string RegionName { get; }
-
         //int HeadlinerWeight { get; }
         //int SupportActWeight { get; }
     }

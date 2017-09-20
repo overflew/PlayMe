@@ -148,6 +148,7 @@
     <Compile Include="AutoPlay\Recommendations\RecommendationsAutoplay.cs" />
     <Compile Include="AutoPlay\Recommendations\IRecommendationsConfig.cs" />
     <Compile Include="AutoPlay\Songkick\ISongkickConfig.cs" />
+    <Compile Include="AutoPlay\Songkick\RandomGigPickerService.cs" />
     <Compile Include="AutoPlay\Songkick\SongkickApi\SongkickApiModels.cs" />
     <Compile Include="AutoPlay\Songkick\SongkickApi\SongkickApiService.cs" />
     <Compile Include="AutoPlay\Songkick\SongkickAutoplay.cs" />
