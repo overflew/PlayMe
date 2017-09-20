@@ -71,7 +71,7 @@ namespace PlayMe.Server.AutoPlay.Songkick
         {
             return artistBillings.Any(b => b.Billing.Equals("headline", StringComparison.InvariantCultureIgnoreCase))
                 ? WEIGHTING_HEADLINER
-                : WEIGHTING_SUPPORT
+                : WEIGHTING_SUPPORT;
         }
     }
 

@@ -20,6 +20,7 @@ namespace PlayMe.Server.AutoPlay.Songkick
     {
         private readonly SongkickApiService _songkickApiService;
         private readonly RandomGigPickerService _randomGigPickerService;
+        private readonly SpotifyArtistMatcherService _spotifyArtistMatcherService;
 
         private readonly NewSpotifyProvider _spotify;
         private readonly IDataService<QueuedTrack> _queuedTrackDataService;
@@ -37,6 +38,7 @@ namespace PlayMe.Server.AutoPlay.Songkick
             // TODO: Inject these via interfaces
             SongkickApiService songkickApiService,
             RandomGigPickerService randomGigPickerSerice,
+            SpotifyArtistMatcherService spotifyArtistMatcherService,
             NewSpotifyProvider spotify,
             IDataService<QueuedTrack> queuedTrackDataService,
             ITrackMapper trackMapper,
@@ -45,7 +47,8 @@ namespace PlayMe.Server.AutoPlay.Songkick
         {
             _songkickApiService = songkickApiService;
             _randomGigPickerService = randomGigPickerSerice;
-           
+            _spotifyArtistMatcherService = spotifyArtistMatcherService;
+
             _spotify = spotify;
             _queuedTrackDataService = queuedTrackDataService;
             _trackMapper = trackMapper;
@@ -71,6 +74,12 @@ namespace PlayMe.Server.AutoPlay.Songkick
         {
             var upcomingEvents = GetUpcomingEvents();
 
+            //TODO status == error, no results, etc.
+            if (!upcomingEvents.ResultsPage.Status.Equals("ok", StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new AutoplayBlockedException("Error getting Songkick results");
+            }
+
             ArtistGigResult artistEventResult = null;
             FullArtist spotifyArtist = null;
 
@@ -78,7 +87,7 @@ namespace PlayMe.Server.AutoPlay.Songkick
             {
                 artistEventResult = _randomGigPickerService.PickRandomGig_ByArtistWeight(upcomingEvents.ResultsPage.Results.Event);
 
-                spotifyArtist = FindSpotifyArtist(artistEventResult.ArtistName);
+                spotifyArtist = _spotifyArtistMatcherService.FindSpotifyArtist(artistEventResult.ArtistName);
 
                 if (artistEventResult != null
                     && spotifyArtist != null)
@@ -92,90 +101,12 @@ namespace PlayMe.Server.AutoPlay.Songkick
                 throw new AutoplayBlockedException("Couldn't find a matched artist");
             }
 
-            var spotifyTrack = PickTrackByArtist(spotifyArtist);
+            var spotifyTrack = _spotifyArtistMatcherService.PickTrackByArtist(spotifyArtist);
 
             var mappedTrack = MapTrack(spotifyTrack, artistEventResult.Event);
 
             return mappedTrack;
-        }
-
-        private FullArtist FindSpotifyArtist(string artistName)
-        {
-            // -- Find matching artist candidates from Spotify
-
-            var spotifyClient = _spotify.GetClient();
-
-            var searchableArtistName = GetSearchableArtistName(artistName);
-
-            var artistSearchResults = spotifyClient.SearchItems(
-                searchableArtistName, 
-                SpotifyAPI.Web.Enums.SearchType.Artist, 
-                market: "NZ");
-
-            if (artistSearchResults.Artists.Total == 0)
-            {
-                return null;
-            }
-
-            // -- Pick a reasonably-exact match
-
-            var compareOptions = System.Globalization.CompareOptions.IgnoreNonSpace // Make sure to allow mācrön-matches
-                | System.Globalization.CompareOptions.IgnoreSymbols
-                | System.Globalization.CompareOptions.IgnoreCase;
-
-            var comparer = System.Globalization.CultureInfo.CurrentCulture.CompareInfo;
-
-            var searchableArtistKey = MakeSearchKey(artistName);
-            var firstArtistResult = artistSearchResults.Artists.Items
-                .Where(a => comparer.Compare(MakeSearchKey(a.Name), searchableArtistKey, compareOptions) == 0)
-                .FirstOrDefault();
-
-            if (firstArtistResult == null)
-            {
-                _logger.Debug($"No artist match found for: '{artistName}'");
-            }
-
-            return firstArtistResult;            
-        }
-
-        private string MakeSearchKey(string s)
-        {
-            if (s.Contains("&"))
-            {
-                s = s.Replace("&", "and");
-            }           
-
-            return s;
-        }
-
-        private string GetSearchableArtistName(string artistName)
-        {
-            if (artistName.EndsWith(" NZ", StringComparison.InvariantCultureIgnoreCase))
-            {
-                artistName = artistName.Replace(" NZ", "");
-            }
-
-            if (artistName.EndsWith(" (NZ)", StringComparison.InvariantCultureIgnoreCase))
-            {
-                artistName = artistName.Replace(" (NZ)", "");                    
-            }
-
-            return artistName;              
-        }
-
-        private FullTrack PickTrackByArtist(FullArtist spotifyArtist)
-        {
-            var client = _spotify.GetClient();
-            var artistTopTracks = client.GetArtistsTopTracks(spotifyArtist.Id, "NZ");
-
-            if (!artistTopTracks.Tracks.Any())
-            {
-                return null;
-            }
-
-            var randomIndex = _random.Next(artistTopTracks.Tracks.Count());
-            return artistTopTracks.Tracks.ToArray()[randomIndex];
-        }
+        }        
         
         private QueuedTrack MapTrack(FullTrack track, Event eventDetail)
         {

@@ -152,6 +152,7 @@
     <Compile Include="AutoPlay\Songkick\SongkickApi\SongkickApiModels.cs" />
     <Compile Include="AutoPlay\Songkick\SongkickApi\SongkickApiService.cs" />
     <Compile Include="AutoPlay\Songkick\SongkickAutoplay.cs" />
+    <Compile Include="AutoPlay\Songkick\SpotifyArtistMatcherService.cs" />
     <Compile Include="AutoPlay\Util\AutoplayBlockedException.cs" />
     <Compile Include="Broadcast\Broadcasters\Twitter\ITwitterSettings.cs" />
     <Compile Include="Broadcast\Broadcasters\Twitter\TwitterSettings.cs" />
