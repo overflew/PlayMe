@@ -40,7 +40,8 @@ namespace PlayMe.Server.AutoPlay.Songkick
                 SpotifyAPI.Web.Enums.SearchType.Artist,
                 market: "NZ");
 
-            if (artistSearchResults.Artists.Total == 0)
+            if (artistSearchResults.Artists == null
+                || artistSearchResults.Artists.Total == 0)
             {
                 return null;
             }
@@ -96,7 +97,8 @@ namespace PlayMe.Server.AutoPlay.Songkick
             var client = _spotify.GetClient();
             var artistTopTracks = client.GetArtistsTopTracks(spotifyArtist.Id, "NZ");
 
-            if (!artistTopTracks.Tracks.Any())
+            if (artistTopTracks.Tracks == null
+                || !artistTopTracks.Tracks.Any())
             {
                 return null;
             }

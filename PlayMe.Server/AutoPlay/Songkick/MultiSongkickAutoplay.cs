@@ -1,5 +1,6 @@
 ﻿using Nerdle.AutoConfig;
 using PlayMe.Common.Model;
+using PlayMe.Common.Util;
 using PlayMe.Data;
 using PlayMe.Plumbing.Diagnostics;
 using PlayMe.Server.AutoPlay.Meta;
@@ -16,10 +17,8 @@ using System.Threading.Tasks;
 
 namespace PlayMe.Server.AutoPlay.Songkick
 {
-    public class SongkickAutoplay : IStandAloneAutoPlay
+    public class MultiSongkickAutoplay : IStandAloneAutoPlay
     {
-        const bool DEBUG_GENRE_CHECK = false;
-
         private readonly SongkickApiService _songkickApiService;
         private readonly RandomGigPickerService _randomGigPickerService;
         private readonly SpotifyArtistMatcherService _spotifyArtistMatcherService;
@@ -32,11 +31,11 @@ namespace PlayMe.Server.AutoPlay.Songkick
 
         private readonly Random _random;
 
-        const string AutoplayDisplayName = "Autoplay - Gigs";
-        private const string LoggingPrefix = "[GigsAutoplay]";
-        private const string AnalysisId = "[GigsAutoplay]";
+        const string AutoplayDisplayName = "Autoplay - Gigs far away";
+        private const string LoggingPrefix = "[GigsInternationalAutoplay]";
+        private const string AnalysisId = "[GigsInternationalAutoplay]";
 
-        public SongkickAutoplay(
+        public MultiSongkickAutoplay(
             // TODO: Inject these via interfaces
             SongkickApiService songkickApiService,
             RandomGigPickerService randomGigPickerSerice,
@@ -59,49 +58,51 @@ namespace PlayMe.Server.AutoPlay.Songkick
             _songkickConfig = AutoConfig.Map<ISongkickConfig>();
 
             _random = new Random();
-
-            if (DEBUG_GENRE_CHECK)
-            {
-                debug_TestAllArtists();
-            }
         }
 
-        private UpcomingEventsResponse _cachedUpcomingEvents;
-        private UpcomingEventsResponse GetUpcomingEvents()
+        private Dictionary<int, UpcomingEventsResponse> _cachedUpcomingEventsPerCity;
+
+        private UpcomingEventsResponse GetUpcomingEventsForCity(ISongKickCity city)
         {
-            if (_cachedUpcomingEvents == null)
+            if (_cachedUpcomingEventsPerCity == null)
             {
-                // TODO: Actual cache w/expiry
-                _cachedUpcomingEvents = _songkickApiService.GetUpcomingEvents(_songkickConfig.RegionId);
+                _cachedUpcomingEventsPerCity = new Dictionary<int, UpcomingEventsResponse>();
             }
 
-            return _cachedUpcomingEvents;
-        }        
+            if (!_cachedUpcomingEventsPerCity.ContainsKey(city.Id))
+            { 
+                _cachedUpcomingEventsPerCity[city.Id] = _songkickApiService.GetUpcomingEvents(city.Id);
+            }
+
+            return _cachedUpcomingEventsPerCity[city.Id];
+        }
+
+        private ISongKickCity PickRandomCity()
+        {
+            var cities = _songkickConfig.MultiSongkickConfigs;
+            return WeightingUtil.ChooseWeightedRandom(cities);
+        }
 
         public QueuedTrack FindTrack()
         {
-            var upcomingEvents = GetUpcomingEvents();
+            var randomCity = PickRandomCity();
+
+            var upcomingEvents = GetUpcomingEventsForCity(randomCity);
 
             //TODO status == error, no results, etc.
             if (!upcomingEvents.ResultsPage.Status.Equals("ok", StringComparison.InvariantCultureIgnoreCase))
             {
-                throw new AutoplayBlockedException($"Error getting Songkick results: {upcomingEvents.ResultsPage.Status}");
+                throw new AutoplayBlockedException("Error getting Songkick results");
             }
 
             ArtistGigResult artistEventResult = null;
             FullArtist spotifyArtist = null;
 
-            for (int retries = 10; retries > 0; retries--)
+            for (int retries = 3; retries > 0; retries--)
             {
                 artistEventResult = _randomGigPickerService.PickRandomGig_ByArtistWeight(upcomingEvents.ResultsPage.Results.Event);
 
                 spotifyArtist = _spotifyArtistMatcherService.FindSpotifyArtist(artistEventResult.ArtistName);
-
-                if (spotifyArtist != null
-                    && HasBadGenre(spotifyArtist))
-                {                    
-                    continue;
-                }
 
                 if (artistEventResult != null
                     && spotifyArtist != null)
@@ -128,38 +129,18 @@ namespace PlayMe.Server.AutoPlay.Songkick
 
             var mappedTrack = MapTrack(spotifyTrack, artistEventResult.Event);
 
+            mappedTrack.User = "Autoplay - Gigs far away";
+            mappedTrack.Reason = $"Playing in: {randomCity.Name}";
+
             // Debug: Learn more about genres...
-            var genres = spotifyArtist.Genres != null && spotifyArtist.Genres.Any()
-                ? string.Join(", ", spotifyArtist.Genres.ToList())
+            var artistDetail = _spotify.GetClient().GetArtist(spotifyArtist.Id);
+            var genres = artistDetail.Genres != null && artistDetail.Genres.Any()
+                ? string.Join(", ", artistDetail.Genres.ToList())
                 : "(no genres)";
             mappedTrack.Reason += $" [${genres}]";
-            _logger.Debug($"Genre finding: '{spotifyArtist.Name}': {genres}");
-
-            mappedTrack.Reason += $", pop: {artistEventResult.Event.Popularity}";
+            _logger.Debug($"Genre finding: '{artistDetail.Name}': {genres}");
 
             return mappedTrack;
-        }
-        
-        private bool HasBadGenre(FullArtist artist)
-        {
-            if (artist.Genres == null
-                || !artist.Genres.Any())
-            {
-                return false;
-            }
-                
-            var badGenres = _songkickConfig.BadGenres.SelectMany(badGenre =>
-                artist.Genres.Where(artistGenre =>
-                    artistGenre.Contains(badGenre.Contains))).ToList();
-
-
-            if (badGenres.Any())
-            {
-                _logger.Info($"Bad genre!: Skipping artist '{artist.Name}' - '{String.Join(", ", badGenres)}'");
-                return true;
-            }
-
-            return false;
         }
         
         private QueuedTrack MapTrack(FullTrack track, Event eventDetail)
@@ -182,41 +163,6 @@ namespace PlayMe.Server.AutoPlay.Songkick
             };
 
             return result;
-        }
-
-        private void debug_TestAllArtists() {
-            var upcomingEvents = GetUpcomingEvents();
-
-            //TODO status == error, no results, etc.
-            if (!upcomingEvents.ResultsPage.Status.Equals("ok", StringComparison.InvariantCultureIgnoreCase))
-            {
-                throw new AutoplayBlockedException("Error getting Songkick results");
-            }
-
-            _logger.Debug($"Songkick: {upcomingEvents.ResultsPage.Results.Event.Count()} events");
-
-            upcomingEvents.ResultsPage.Results.Event.ForEach(e => {
-                e.Performance.Where(p => p.Billing == "headline")                            
-                            .Select(p => p.DisplayName)
-                            .ToList()
-                            .Distinct()
-                            .ToList()
-                            .ForEach(a =>
-                {
-                    var spotifyArtist = _spotifyArtistMatcherService.FindSpotifyArtist(a);
-                    if (spotifyArtist == null)
-                    {
-                        //_logger.Debug($"SK: Artist: {a} -> Not found");
-                        return;
-                    }
-
-                    var genres = spotifyArtist.Genres != null && spotifyArtist.Genres.Any()
-                        ? string.Join(", ", spotifyArtist.Genres.ToList())
-                        : "(no genres)";
-
-                    _logger.Debug($"SK:\t{spotifyArtist.Name}\t{genres}\t{spotifyArtist.Popularity}\t{e.Popularity}");
-                });
-            });
-        }
+        }        
     }
 }

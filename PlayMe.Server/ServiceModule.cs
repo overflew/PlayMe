@@ -61,7 +61,8 @@ namespace PlayMe.Server
             Bind<IStandAloneAutoPlay>().To<CuratedAccountsAutoplay>();
             Bind<IStandAloneAutoPlay>().To<RecommendationsAutoplay>();
             Bind<IStandAloneAutoPlay>().To<SongkickAutoplay>();
-            
+            Bind<IStandAloneAutoPlay>().To<MultiSongkickAutoplay>();
+
             Bind<ISearchSuggestionService>().To<SearchSuggestionService>();
             Bind<IRickRollService>().To<RickRollService>();
             Bind<IRandomizerFactory>().To<RandomizerFactory>();

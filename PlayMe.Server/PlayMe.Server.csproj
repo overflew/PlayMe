@@ -151,6 +151,7 @@
     <Compile Include="AutoPlay\Songkick\RandomGigPickerService.cs" />
     <Compile Include="AutoPlay\Songkick\SongkickApi\SongkickApiModels.cs" />
     <Compile Include="AutoPlay\Songkick\SongkickApi\SongkickApiService.cs" />
+    <Compile Include="AutoPlay\Songkick\MultiSongkickAutoplay.cs" />
     <Compile Include="AutoPlay\Songkick\SongkickAutoplay.cs" />
     <Compile Include="AutoPlay\Songkick\SpotifyArtistMatcherService.cs" />
     <Compile Include="AutoPlay\Util\AutoplayBlockedException.cs" />
