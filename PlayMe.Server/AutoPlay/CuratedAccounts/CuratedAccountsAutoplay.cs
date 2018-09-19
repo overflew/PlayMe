@@ -17,7 +17,7 @@ namespace PlayMe.Server.AutoPlay.CuratedAccounts
         private readonly ILogger _logger;
         private readonly ITrackMapper _trackMapper;
 
-        const string CuratedPlaylistsDisplayName = "Autoplay - Curated accounts";
+        const string CuratedPlaylistsDisplayName = Constants.AutoplayUserNameBasePrefix + " - Curated accounts";
         const string LoggingPrefix = "[CuratedAccounts]";
         const string AnalysisId = "[CuratedAccounts]";
 

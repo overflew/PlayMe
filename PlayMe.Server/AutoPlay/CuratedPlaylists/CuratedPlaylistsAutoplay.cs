@@ -15,7 +15,7 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
     public class CuratedPlaylistsAutoplay : IStandAloneAutoPlay
     {
         // User name to appear in the UI
-        const string CuratedPlaylistsDisplayName = "Autoplay - Curated playlists";
+        const string CuratedPlaylistsDisplayName = Constants.AutoplayUserNameBasePrefix + " - Curated playlists";
         const string LoggingPrefix = "[CuratedPlaylists]";
         const string AnalysisId = "[CuratedPlaylists]";
 
