@@ -35,7 +35,7 @@ namespace PlayMe.Server.AutoPlay.Recommendations
 
         private readonly Random _random;
 
-        const string AutoplayDisplayName = "Autoplay - Recommendations";
+        const string AutoplayDisplayName = Constants.AutoplayUserNameBasePrefix + " - Recommendations";
         private const string LoggingPrefix = "[RecommendationsAutoplay]";
         private const string AnalysisId = "[RecommendationsAutoplay]";
 
@@ -207,7 +207,7 @@ namespace PlayMe.Server.AutoPlay.Recommendations
         {
             var seedTracks = _queuedTrackDataService.GetAll()
                 .Where(t => 
-                    t.User.StartsWith("Autoplay")
+                    t.User.StartsWith(Constants.AutoplayUserNameBasePrefix)
                     && t.Likes.Any()
                     && !t.IsSkipped)
                 .OrderByDescending(t => t.StartedPlayingDateTime)
@@ -221,7 +221,7 @@ namespace PlayMe.Server.AutoPlay.Recommendations
         {
             var seedTracks = _queuedTrackDataService.GetAll()
                 .Where(t => 
-                    !t.User.StartsWith("Autoplay")
+                    !t.User.StartsWith(Constants.AutoplayUserNameBasePrefix)
                     && !t.IsSkipped)
                 .OrderByDescending(t => t.StartedPlayingDateTime)
                 .Take(_recommendationsConfig.UserTracksSeeds)

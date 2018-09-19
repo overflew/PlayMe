@@ -2,6 +2,6 @@
 {
     public class Constants
     {
-        public const string AutoplayUserName = "Autoplay";
+        public const string AutoplayUserNameBasePrefix = "Autoplay";
     }
 }
