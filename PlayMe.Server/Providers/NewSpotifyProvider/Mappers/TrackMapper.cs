@@ -87,7 +87,8 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
                 Duration = new TimeSpan(track.DurationMs),
                 DurationMilliseconds = track.DurationMs,
                 MusicProvider = SpotifyConsts.SpotifyMusicProviderDescriptor,
-                ExternalLink = new Uri(track.ExternUrls["spotify"])
+                ExternalLink = new Uri(track.ExternUrls["spotify"]),
+                SongPreviewUrl = track.PreviewUrl
             };
 
             if (mapArtists && track.Artists != null)
