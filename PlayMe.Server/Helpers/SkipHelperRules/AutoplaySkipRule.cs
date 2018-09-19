@@ -8,7 +8,7 @@ namespace PlayMe.Server.Helpers.SkipHelperRules
     {
         public int GetRequiredVetoCount(QueuedTrack track)
         {
-            const int minVetoCount = 2;
+            const int minVotesToSkipAutoplayTrack = 2;
 
             if (track.User == null)
             {
@@ -16,7 +16,7 @@ namespace PlayMe.Server.Helpers.SkipHelperRules
             }
 
             return track.User.StartsWith(Constants.AutoplayUserNameBasePrefix, StringComparison.CurrentCultureIgnoreCase)
-                        ? minVetoCount
+                        ? minVotesToSkipAutoplayTrack
                         : int.MaxValue;
         }
 
