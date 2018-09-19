@@ -20,6 +20,7 @@ namespace PlayMe.Server.AutoPlay
         private readonly IMusicProviderFactory musicProviderFactory;
         private readonly IRandomizerFactory randomizerFactory;
 
+        private const string DefaultAutoPlay_DisplayName = Constants.AutoplayUserNameBasePrefix;
         private const string AnalysisId = "[DefaultAutoplay]";
 
         public DefaultAutoPlay(
@@ -79,10 +80,10 @@ namespace PlayMe.Server.AutoPlay
                 var queuedTrack = new QueuedTrack();
                 var tracksMusicProvider = musicProviderFactory.GetMusicProviderByIdentifier(qt.value.Track.MusicProvider.Identifier);
                 if (!tracksMusicProvider.IsEnabled) continue;
-                var t = tracksMusicProvider.GetTrack(qt._id, Constants.AutoplayUserName);
+                var t = tracksMusicProvider.GetTrack(qt._id, DefaultAutoPlay_DisplayName);
                 if (t == null) continue;
                 queuedTrack.Track = t;
-                queuedTrack.User = Constants.AutoplayUserName;
+                queuedTrack.User = DefaultAutoPlay_DisplayName;
 
                 _tracksForAutoplaying.Push(queuedTrack);
             }
