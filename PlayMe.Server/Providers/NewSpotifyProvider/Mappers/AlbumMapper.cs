@@ -1,6 +1,8 @@
 ﻿using System;
 using PlayMe.Common.Model;
 using SpotifyAPI.Web.Models;
+using PlayMe.Server.Providers.SpotifyProvider;
+using System.Linq;
 
 namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
 {
@@ -9,13 +11,11 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
     {
         Album Map(
             SimpleAlbum album, 
-            //SpotifyMusicProvider musicProvider, 
             bool mapArtist = false
             );
 
         Album Map(
             FullAlbum album,
-            //SpotifyMusicProvider musicProvider, 
             bool mapArtist = false
             );
     }
@@ -31,19 +31,62 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
 
         public Album Map(
             SimpleAlbum album, 
-            //SpotifyMusicProvider musicProvider, 
             bool mapArtist = false)
         {
             var albumResult = new Album
             {
                 Link = album.Id,
                 Name = album.Name,
-                //Year = album..Year,
+                //Year = // TODO: Process this off album.ReleaseDate
                 //ArtworkId = album.CoverId,
                 IsAvailable = true, //album.IsAvailable,
-                //MusicProvider = musicProvider.Descriptor,
+                MusicProvider = SpotifyConsts.SpotifyMusicProviderDescriptor,
                 ExternalLink = new Uri(album.ExternalUrls["spotify"])
             };
+
+            if (album.Images != null)
+            {
+                if (album.Images.Count >= 1)
+                {
+                    albumResult.ArtworkUrlLarge = album.Images[0].Url;
+                }
+
+                if (album.Images.Count >= 2)
+                {
+                    albumResult.ArtworkUrlMedium = album.Images[1].Url;
+                }
+
+                if (album.Images.Count >= 3)
+                {
+                    albumResult.ArtworkUrlSmall = album.Images[2].Url;
+                }
+            }
+            
+            return albumResult;
+
+        }
+
+        public Album Map(
+            FullAlbum album,
+            bool mapArtist = false)
+        {
+            var albumResult = new Album
+            {
+                Link = album.Id,
+                Name = album.Name,
+                //Year = album.Year, // TODO: Process this off album.ReleaseDate
+                //ArtworkId = album.CoverId,
+                IsAvailable = true, //album.IsAvailable,
+                MusicProvider = SpotifyConsts.SpotifyMusicProviderDescriptor,
+                ExternalLink = new Uri(album.ExternalUrls["spotify"]),
+                
+            };
+
+            if (mapArtist)
+            {
+                albumResult.Artist = artistMapper.Map(album.Artists.First());
+            }
+
 
             if (album.Images != null)
             {
@@ -66,5 +109,7 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
             return albumResult;
 
         }
+
+
     }
 }

@@ -2,6 +2,7 @@
 using System.Linq;
 using PlayMe.Common.Model;
 using PlayMe.Server.Helpers.Interfaces;
+using PlayMe.Server.Providers.SpotifyProvider;
 
 namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
 {
@@ -41,14 +42,6 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
             bool mapAlbum = true,
             bool mapArtists = true)
         {
-            // TODO: Figure out how I'm supposed to get this damned thing
-            var providerHack = new MusicProviderDescriptor()
-            {
-                Identifier = "sp",
-                Name = "Spotify"
-            };
-
-            //string trackLink = track.GetLinkString();
             var trackResult = new Track
             {
                 Link = track.Id,
@@ -56,8 +49,9 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
                 IsAvailable = track.IsPlayable == null ? true : track.IsPlayable.Value,
                 Duration = new TimeSpan(track.DurationMs),
                 DurationMilliseconds = track.DurationMs,
-                MusicProvider = providerHack,
-                ExternalLink = new Uri(track.ExternUrls["spotify"])
+                MusicProvider = SpotifyConsts.SpotifyMusicProviderDescriptor,
+                ExternalLink = new Uri(track.ExternUrls["spotify"]),
+                SongPreviewUrl = track.PreviewUrl
             };
 
             if (mapAlbum && track.Album != null)
@@ -85,14 +79,6 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
             bool mapArtists = true)
         {
 
-            // TODO: Figure out how I'm supposed to get this damned thing
-            var providerHack = new MusicProviderDescriptor()
-            {
-                Identifier = "sp",
-                Name = "Spotify"
-            };
-
-            //string trackLink = track.GetLinkString();
             var trackResult = new Track
             {
                 Link = track.Id,
@@ -100,7 +86,7 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider.Mappers
                 //IsAvailable = track.IsPlayable == null ? true : track.IsPlayable.Value,
                 Duration = new TimeSpan(track.DurationMs),
                 DurationMilliseconds = track.DurationMs,
-                MusicProvider = providerHack,
+                MusicProvider = SpotifyConsts.SpotifyMusicProviderDescriptor,
                 ExternalLink = new Uri(track.ExternUrls["spotify"])
             };
 

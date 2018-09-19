@@ -55,6 +55,12 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
                 SpotifyAPI.Web.Enums.SearchType.All, 
                 market: "NZ");
 
+            if (searchResults.HasError())
+            {
+                _logger.Warn($"Error searching for: '${searchTerm}' - ${searchResults.Error}");
+                // return MakeEmptySearchResults();
+            }
+
             var artists = new ArtistPagedList
             {
                 Total = searchResults.Artists.Items.Count(),
@@ -62,14 +68,21 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
                    _artistMapper.Map(a)).ToArray()
             };
 
+            // TODO/TEMP: Awaiting a fix in SpotifyAPI lib: https://github.com/JohnnyCrazy/SpotifyAPI-NET/issues/289
             var albums = new AlbumPagedList
             {
-                Total = searchResults.Albums.Total,
-                Albums = searchResults.Albums.Items.Select(
-                    a => _albumMapper.Map(a)).ToArray()
+                Total = 0,
+                Albums = new List<Album>()
             };
 
-            var tracks = new TrackPagedList
+             /*var albums = new AlbumPagedList
+             {
+                 Total = searchResults.Albums.Total,
+                 Albums = searchResults.Albums.Items.Select(
+                     a => _albumMapper.Map(a)).ToArray()
+             };*/
+
+             var tracks = new TrackPagedList
             {
                 Total = searchResults.Tracks.Total,
                 Tracks = searchResults.Tracks.Items.Select(
@@ -85,6 +98,7 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
             return results;
         }
 
+        
         public Artist BrowseArtist(string link, bool mapTracks)
         {
             var client = _spotify.GetClient();
@@ -106,7 +120,7 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
 
             var album = client.GetAlbum(link);
 
-            var albumResult = _albumMapper.Map(album);
+            var albumResult = _albumMapper.Map(album, true);
 
             albumResult.Tracks = album.Tracks.Items.Select(
                 t => _trackMapper.Map(t, user)).ToArray();
@@ -116,5 +130,28 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
 
             return albumResult;
         }
+
+        private SearchResults MakeEmptySearchResults()
+        {
+            return new SearchResults()
+            {
+                PagedArtists = new ArtistPagedList
+                {
+                    Total = 0,
+                    Artists = new List<Artist>()
+                },
+                PagedAlbums = new AlbumPagedList
+                {
+                    Total = 0,
+                    Albums = new List<Album>()
+                },
+                PagedTracks = new TrackPagedList
+                {
+                    Total = 0,
+                    Tracks = new List<Track>()
+                }
+            };
+        }
+
     }
 }

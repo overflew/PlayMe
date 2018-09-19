@@ -206,6 +206,7 @@
     <Compile Include="Providers\SoundCloud\ISoundCloudSettings.cs" />
     <Compile Include="Providers\SoundCloud\SoundCloudSettings.cs" />
     <Compile Include="Providers\SpotifyProvider\ISpotifySettings.cs" />
+    <Compile Include="Providers\SpotifyProvider\SpotifyConsts.cs" />
     <Compile Include="Queue\ForbiddenMusicService.cs" />
     <Compile Include="Queue\TrackBlockedReason.cs" />
     <Compile Include="UserService.cs" />

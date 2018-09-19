@@ -16,5 +16,6 @@ namespace PlayMe.Common.Model
         public int Popularity { get; set; }
         public string TrackArtworkUrl { get; set; }
         public string Reason { get; set; }
+        public string SongPreviewUrl { get; set; }
     }
 }
