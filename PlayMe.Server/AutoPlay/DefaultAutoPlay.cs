@@ -7,27 +7,29 @@ using PlayMe.Data;
 using PlayMe.Data.Mongo;
 using PlayMe.Server.AutoPlay.TrackRandomizers;
 using PlayMe.Server.Providers;
+using System.Collections.Concurrent;
 
 namespace PlayMe.Server.AutoPlay
 {
-    public class DefaultAutoPlay : IAutoPlay
+    public class DefaultAutoPlay : IStandAloneAutoPlay
     {
         private readonly IDataService<MapReduceResult<TrackScore>> trackScoreDataService;
         private readonly IDataService<QueuedTrack> queuedTrackDataService;
-        private readonly Stack<QueuedTrack> _tracksForAutoplaying = new Stack<QueuedTrack>();
+        private readonly ConcurrentStack<QueuedTrack> _tracksForAutoplaying = new ConcurrentStack<QueuedTrack>();
         private readonly Settings settings;
         private readonly IMusicProviderFactory musicProviderFactory;
         private readonly IRandomizerFactory randomizerFactory;
 
+        private const string AnalysisId = "[DefaultAutoplay]";
+
         public DefaultAutoPlay(
-            IMusicProviderFactory musicProviderFactory, 
+            IMusicProviderFactory musicProviderFactory,
             IDataService<MapReduceResult<TrackScore>> trackScoreDataService,
             IDataService<QueuedTrack> queuedTrackDataService,
             IRandomizerFactory randomizerFactory,
             Settings settings
             )
         {
-            
             this.trackScoreDataService = trackScoreDataService;
             this.queuedTrackDataService = queuedTrackDataService;
             this.musicProviderFactory = musicProviderFactory;
@@ -37,25 +39,34 @@ namespace PlayMe.Server.AutoPlay
 
         public QueuedTrack FindTrack()
         {
+            // Note: No longer will queue 'last track played' when the queue is empty.
+            //       ^ As multi-autoplay will just get duplicates...
+
             if (_tracksForAutoplaying.Count <= settings.MinAutoplayableTracks)
             {
-                if (_tracksForAutoplaying.Count == 0)
+                FillBagWithAutoplayTracks(null);
+                if (!_tracksForAutoplaying.Any())
                 {
-                    //If we have no tracks, we're probably just starting the service, just get the last track played
-                    FillBagWithLastTrack();
+                    throw new Exception("Default autoplay could not load any tracks");
                 }
-                // Fill the bag as a non-blocking call
-                ThreadPool.QueueUserWorkItem(FillBagWithAutoplayTracks);
             }
+
             QueuedTrack track = null;
-            if (_tracksForAutoplaying.LongCount() > 0)
+            if (_tracksForAutoplaying.TryPop(out track))
             {
-                track = randomizerFactory.Randomize.Execute(_tracksForAutoplaying.Pop());
+                randomizerFactory.Randomize.Execute(track);
             }
+
+            // Reset this audit stuff. 
+            // As it's picking up what was saved to the DB, there's a chance it would maybe have old audit data on it?
+            track.AutoplayMetaInfo = new Meta.AutoplayMetaInfo()
+            {
+                AutoplayNameId = AnalysisId
+            };
 
             return track;
         }
-        
+
         private void FillBagWithAutoplayTracks(object stateInfo)
         {
             var scoredTracks = PickTracks();
@@ -79,11 +90,12 @@ namespace PlayMe.Server.AutoPlay
 
         private void FillBagWithLastTrack()
         {
-            var chosenTrack =queuedTrackDataService.GetAll()
-                .Where( t => !t.Vetoes.Any())
+            var chosenTrack = queuedTrackDataService.GetAll()
+                .Where(t => !t.Vetoes.Any())
                 .OrderByDescending(qt => qt.StartedPlayingDateTime)
                 .FirstOrDefault();
-            if(chosenTrack!=null){
+            if (chosenTrack != null)
+            {
                 _tracksForAutoplaying.Push(chosenTrack);
             }
         }
@@ -101,7 +113,7 @@ namespace PlayMe.Server.AutoPlay
         private IEnumerable<MapReduceResult<TrackScore>> PickTracks(double minMillisecondsSinceLastPlay)
         {
             return trackScoreDataService.GetAll()
-                .Where(s => !s.value.IsExcluded && s.value.MillisecondsSinceLastPlay > minMillisecondsSinceLastPlay)                
+                .Where(s => !s.value.IsExcluded && s.value.MillisecondsSinceLastPlay > minMillisecondsSinceLastPlay)
                 .OrderByDescending(s => s.value.Score)
                 .Take(settings.MaxAutoplayableTracks)
                 .ToList();

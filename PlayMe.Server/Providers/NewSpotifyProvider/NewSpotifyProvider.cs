@@ -16,8 +16,9 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
         private readonly ILogger logger;
         private readonly INewSpotifySettings spotifySettings;
 
-        private SpotifyWebAPI _client;
-        private Token _currentToken;
+        // Cached auth
+        private static SpotifyWebAPI _client;
+        private static Token _currentToken;
         
         public NewSpotifyProvider(
             ILogger logger,
@@ -31,7 +32,8 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
         {
             if (_client == null                
                 || IsTokenNearExpiry()
-                || _currentToken.IsExpired() // Safety fallback...
+                || (_currentToken != null 
+                    && _currentToken.IsExpired()) // Safety fallback...
                 )
             {
                 _client = CreateClient();
@@ -40,6 +42,11 @@ namespace PlayMe.Server.Providers.NewSpotifyProvider
             return _client;
         }
 
+        public void ResetCachedAuth()
+        {
+            _client = null;
+            _currentToken = null;
+        }
 
         private SpotifyWebAPI CreateClient()
         {

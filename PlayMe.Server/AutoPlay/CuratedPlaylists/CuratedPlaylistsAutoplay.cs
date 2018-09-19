@@ -8,16 +8,20 @@ using PlayMe.Plumbing.Diagnostics;
 using PlayMe.Server.Providers.NewSpotifyProvider;
 using PlayMe.Server.Providers.NewSpotifyProvider.Mappers;
 using SpotifyAPI.Web.Models;
+using PlayMe.Server.AutoPlay.Meta;
 
 namespace PlayMe.Server.AutoPlay.CuratedPlaylists
 {
-    public class CuratedPlaylistsAutoplay : IAutoPlay
+    public class CuratedPlaylistsAutoplay : IStandAloneAutoPlay
     {
         // User name to appear in the UI
         const string CuratedPlaylistsDisplayName = "Autoplay - Curated playlists";
+        const string LoggingPrefix = "[CuratedPlaylists]";
+        const string AnalysisId = "[CuratedPlaylists]";
 
         // TODO: Move this out to external config. It's required in searches in order to populate 'IsPlayable' on tracks
         private const string LOCAL_MARKET = "NZ";
+        private const int GET_PLAYABLE_TRACK_RETY_LIMIT = 5;
 
         private readonly Random _random;
 
@@ -50,6 +54,12 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
             var client = _spotify.GetClient();
             
             var playlist = client.GetPlaylist(playlistConfig.User, playlistConfig.PlaylistId, null, LOCAL_MARKET);
+            if (playlist.HasError())
+            {
+                throw new NewSpotifyApiException(
+                    $"{LoggingPrefix} Unable to load playlist: (User: '{playlistConfig.User}', playlist: '{playlistConfig.PlaylistName}' / {playlistConfig.PlaylistId}",
+                    playlist.Error);
+            }
 
             // -- Pick a random song
 
@@ -64,7 +74,7 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
             // -- Map it to the business models
             var mappedTrack = _trackMapper.Map(randomTrack.Track, CuratedPlaylistsDisplayName, true, true);
             
-            return new QueuedTrack()
+            var result = new QueuedTrack()
             {
                 Track = mappedTrack,
 
@@ -73,13 +83,29 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
                 Reason = $"Playlist: {playlist.Name}"
             };
 
+            result.AutoplayMetaInfo = new AutoplayMetaInfo()
+            {
+                AutoplayNameId = AnalysisId,
+                MetaInfo = new MetaInfo()
+                {
+                    PlaylistId = playlist.Id,
+                    PlaylistName = playlist.Name,
+                    AccountId = playlist.Owner.Id,
+                    SpotifyUri = playlist.Uri
+
+                    // AccountName = playlist.Owner.DisplayName, // We don't have the account name from that query
+                }
+            };
+
+            return result;
+
         }
 
         private PlaylistTrack PickRandomTrackThatsPlayable(FullPlaylist playlist)
         {
             // TODO: This, but better?
             // Have a limited # of attempts at get a song that registers as being 'IsPlayable' (as a few aren't...)
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < GET_PLAYABLE_TRACK_RETY_LIMIT; i++)
             {
                 var track = PickRandomTrack(playlist);
                 if (track.Track.IsPlayable.GetValueOrDefault())
@@ -112,8 +138,15 @@ namespace PlayMe.Server.AutoPlay.CuratedPlaylists
             var indexAfterOffset = randomIndex - offset;
 
             var client = _spotify.GetClient();
+
             var paginatedTracks = 
                 client.GetPlaylistTracks(playlist.Owner.Id, playlist.Id, null, 100, offset, LOCAL_MARKET);
+            if (paginatedTracks.HasError())
+            {
+                throw new NewSpotifyApiException(
+                    $"{LoggingPrefix} Unable to load playlist: (User: '{playlist.Owner.DisplayName}', playlist id: '{playlist.Name}' / {playlist.Id}, page: {page})",                                    
+                    paginatedTracks.Error);
+            }
 
             var randomTrack = paginatedTracks.Items[indexAfterOffset];
 
