@@ -3,6 +3,7 @@ using PlayMe.Common.Util;
 using PlayMe.Server.AutoPlay.Songkick.SongkickApi;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ namespace PlayMe.Server.AutoPlay.Songkick
 
         public ArtistGigResult PickRandomGig_ByArtistWeight(List<Event> upcomingEvents)
         {
+            // 1) Find all artists
             var artistKeys = upcomingEvents.SelectMany(e => e.Performance.Select(p => new
             {
                 ArtistName = p.DisplayName
@@ -31,7 +33,8 @@ namespace PlayMe.Server.AutoPlay.Songkick
 
             var distinctArtistKeys = artistKeys.Distinct();
 
-            var artistEventsLookup = artistKeys.Select(a => new
+            // 2) Group events by artist
+            var artistEventsLookup = distinctArtistKeys.Select(a => new
             {
                 key = a,
                 events = upcomingEvents.Where(e =>
@@ -47,18 +50,20 @@ namespace PlayMe.Server.AutoPlay.Songkick
             var weightedArtistThing = artistEventsLookup.Select(a => new WeightedThing
             {
                 ArtistName = a.key.ArtistName,
-                Event = a.events.First(),
+                Event = a.events.First(), // Just show 1 gig
                 Weight = GetWeighting(a.billings)
             }).ToList();
 
-            var x = WeightingUtil.ChooseWeightedRandom(weightedArtistThing);
+            // 3) Pick by weighting
+            var randomArtist = WeightingUtil.ChooseWeightedRandom(weightedArtistThing);
 
             return new ArtistGigResult() {
-                ArtistName = x.ArtistName,
-                Event = x.Event
+                ArtistName = randomArtist.ArtistName,
+                Event = randomArtist.Event
             };
         }
 
+        [DebuggerDisplay("{ArtistName} ({Weight})")]
         private class WeightedThing : IWeighted
         {
             public string ArtistName { get; set; }
